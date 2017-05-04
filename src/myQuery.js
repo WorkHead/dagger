@@ -27,7 +27,7 @@ Query.prototype = {
         if(_t.isVoid(value)) {
             return this.el[0] && (this.el[0].getAttribute(key) || '');
         }
-        _t.each(this.el, (e)=> {
+        _t.each(this.el, (e) => {
             e.setAttribute(key, value);
         })
         return this;
