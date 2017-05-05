@@ -45,7 +45,55 @@ const _t = {
                 }
             }
         }
-    }
-}
+    },
+    extend(tar, obj) {
+        for(let p in obj) {
+            tar[p] = obj[p];
+        }
+        return tar;
+    },
+    http(opts = {}) {
+        let url = opts.url,
+            method = opts.method || 'get',
+            data = opts.data,
+            success = opts.success,
+            fail = opts.fail,
+            client = new XMLHttpRequest(),
+            responseType = opts.resType || 'text';
+
+        if (method == 'get' && !_t.isVoid(data)) {
+            url += /\?/.test(url) ? '&' + data : '?' + data;
+            data = null;
+        }
+
+        client.open(method, url, true);
+        client.setRequestHeader('signal', 'ab4494b2-f532-4f99-b57e-7ca121a137ca');
+        client.onreadystatechange = handler;
+
+        try {
+            client.responseType = responseType;
+        } catch (err) {
+            client.setRequestHeader('responseType', responseType);
+        }
+        client.setRequestHeader("Content-Type", opts.contentType || "application/x-www-form-urlencoded;charset=utf-8");
+        client.send(data);
+
+        function handler() {
+            let response;
+            if (client.readyState !== 4) {
+                return;
+            }
+            if (client.status === 200) {
+                response = client.response;
+                if (responseType == 'json') {
+                    _t.isString(response) && (response = JSON.parse(response));
+                }
+                success(response);
+            } else {
+                fail(new Error(client.statusText));
+            }
+        };
+    },
+};
 
 export default _t;

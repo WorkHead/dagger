@@ -3,19 +3,10 @@
  */
 
 import $ from './myQuery';
+import render from './render';
 
-const DOC = window.document;
 
-function render(tpl, ct) {
+export {
+    render,
+    $
 }
-
-function Dagger() {
-    return {
-        render: render
-    }
-}
-
-
-window.$ = $;
-console.log(2123);
-export default new Dagger()
