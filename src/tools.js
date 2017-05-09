@@ -3,7 +3,7 @@
  */
 const _t = {
     toString(obj) {
-        return Object.prototype.toString.call(obj)
+        return Object.prototype.toString.call(obj);
     },
     isArray(obj) {
         return this.toString(obj) === '[object Array]';
@@ -67,7 +67,6 @@ const _t = {
         }
 
         client.open(method, url, true);
-        client.setRequestHeader('signal', 'ab4494b2-f532-4f99-b57e-7ca121a137ca');
         client.onreadystatechange = handler;
 
         try {

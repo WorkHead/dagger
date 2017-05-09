@@ -5,7 +5,6 @@
 import $ from './myQuery';
 import render from './render';
 
-
 export {
     render,
     $
