@@ -3,16 +3,36 @@
  */
 import $ from './myQuery';
 
-class vDom {
+class vNode {
     constructor(props) {
         this.tName = props.tName;
+        this.attrs = props.attrs;
+        this.children = props.children;
+        this.nodeType = props.nodeType;
     }
 }
 
-function createVDom() {
+class vTextNode {
+    constructor(props) {
+        this.text = props.text;
+    }
+}
 
+function createVNode(...vObj) {
+    return new vNode({
+        tName: vObj.tName,
+        attrs: vObj.attrs,
+        children: vObj.children,
+        nodeType: vObj.nodeType
+    });
+}
+
+function createVTextNode(...vObj) {
+    return new vTextNode({
+        text: vObj.text
+    });
 }
 
 export {
-    createVDom
+    createVNode
 }

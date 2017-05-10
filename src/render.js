@@ -2,8 +2,8 @@
  * Created by tanjiasheng on 2017/5/5.
  */
 import $ from './myQuery';
-import {parseHTML} from './parser';
-import {createVDom as _c} from './vDom';
+import {parseHTML, genVnodeExp} from './parser';
+import {createVNode as _c} from './vDom';
 
 const urlReg = /^.?(\/?.+)+\w+\.\w+$/;
 
@@ -13,10 +13,12 @@ function render(tpl, elem, scope) {
             url: tpl,
             success(data) {
                 if(!$.isVoid(data)) {
-                    parseHTML(data);
+                    let hObj = parseHTML(data);
+                    let vNodeExp = genVnodeExp(hObj)
+                    console.log(vNodeExp)
                 }
             }
-        })
+        });
     }
 }
 

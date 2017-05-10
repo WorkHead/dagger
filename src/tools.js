@@ -46,6 +46,21 @@ const _t = {
             }
         }
     },
+    dMap(arr, cb) {
+        let resArr = new Array(arr.length);
+        if(this.isArrayLike(arr)) {
+            for(let i = 0; i < arr.length; i++) {
+                resArr[i] = this.callFun(cb, arr[i], [arr[i], i, arr]);
+            }
+        } else if(this.isObject(arr)) {
+            for (let o in arr) {
+                if(arr.hasOwnProperty(o)) {
+                    resArr[o] = this.callFun(cb, arr[o], arr[o]);
+                }
+            }
+        }
+        return resArr;
+    },
     extend(tar, obj) {
         for(let p in obj) {
             tar[p] = obj[p];
