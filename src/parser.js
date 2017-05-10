@@ -75,12 +75,12 @@ function genExp(hObj) {
     switch (type) {
         case 1:
             tName = hObj.tName;
-            attrs = hObj.attrs;
+            attrs = JSON.stringify(hObj.attrs);
             children = hObj.children;
-            return '_c(\"' + tName + '\",\"' + attrs + '", ' + type + ', ' + genChildren(children) + ')';
+            return '_c(\"' + tName + '\",' + attrs + ', ' + type + ', ' + genChildren(children) + ')';
         case 2:
-            text = hObj.text;
-            return '_ct(\"' + text + '\")'
+            text = JSON.stringify(hObj.text);
+            return '_ct(' + text + ')'
     }
 }
 

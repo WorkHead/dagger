@@ -22,4 +22,8 @@ function render(tpl, elem, scope) {
     }
 }
 
+function genVnodeObj(exp) {
+
+}
+
 export default render;
