@@ -20,19 +20,21 @@ class vTextNode {
 
 function createVNode(...vObj) {
     return new vNode({
-        tName: vObj.tName,
-        attrs: vObj.attrs,
-        children: vObj.children,
-        nodeType: vObj.nodeType
+        tName: vObj[0],
+        attrs: vObj[1],
+        nodeType: vObj[2],
+        children: vObj[3]
     });
 }
 
 function createVTextNode(...vObj) {
     return new vTextNode({
-        text: vObj.text
+        text: vObj[0],
+        nodeType: vObj[1]
     });
 }
 
 export {
-    createVNode
+    createVNode,
+    createVTextNode
 }

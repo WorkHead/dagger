@@ -26,6 +26,9 @@ const _t = {
     isArrayLike(obj) {
         return this.isArray(obj) || (!this.isVoid(obj.length) && !this.isVoid(obj[obj.length - 1]));
     },
+    isEmptyStr(str) {
+        return  this.isString(str) && str == '';
+    },
     callFun(fun, ctx) {
         let args = arguments,
             argArr = args[2];
