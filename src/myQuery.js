@@ -31,6 +31,9 @@ Query.prototype = {
             e.setAttribute(key, value);
         });
         return this;
+    },
+    getEl() {
+        return $.isArrayLike(this.el)? this.el: null;
     }
 };
 

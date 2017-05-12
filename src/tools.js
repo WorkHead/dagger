@@ -20,14 +20,19 @@ const _t = {
     isFunction(obj) {
         return this.toString(obj) === '[object Function]';
     },
+    isElement(obj) {
+        let eleReg = /\[object HTML(?:\w+?)Element\]/,
+            str = this.toString(obj);
+        return eleReg.test(str) || str === '[object DocumentFragment]';
+    },
     isVoid(obj) {
         return obj === null || obj === void 0 || obj !== obj;
     },
     isArrayLike(obj) {
-        return this.isArray(obj) || (!this.isVoid(obj.length) && !this.isVoid(obj[obj.length - 1]));
+        return this.isArray(obj) || (!this.isVoid(obj) && !this.isVoid(obj.length) && !this.isVoid(obj[obj.length - 1]));
     },
     isEmptyStr(str) {
-        return  this.isString(str) && str == '';
+        return this.isString(str) && str == '';
     },
     callFun(fun, ctx) {
         let args = arguments,
@@ -37,27 +42,27 @@ const _t = {
             : Array.prototype.slice.call(args, 2));
     },
     each(arr, cb) {
-        if(this.isArrayLike(arr)) {
-            for(let i = 0; i < arr.length; i++) {
+        if (this.isArrayLike(arr)) {
+            for (let i = 0; i < arr.length; i++) {
                 this.callFun(cb, arr[i], [arr[i], i, arr]);
             }
-        } else if(this.isObject(arr)) {
+        } else if (this.isObject(arr)) {
             for (let o in arr) {
-                if(arr.hasOwnProperty(o)) {
-                    this.callFun(cb, arr[o], arr[o]);
+                if (arr.hasOwnProperty(o)) {
+                    this.callFun(cb, arr[o], [arr[o], o]);
                 }
             }
         }
     },
     dMap(arr, cb) {
         let resArr = new Array(arr.length);
-        if(this.isArrayLike(arr)) {
-            for(let i = 0; i < arr.length; i++) {
+        if (this.isArrayLike(arr)) {
+            for (let i = 0; i < arr.length; i++) {
                 resArr[i] = this.callFun(cb, arr[i], [arr[i], i, arr]);
             }
-        } else if(this.isObject(arr)) {
+        } else if (this.isObject(arr)) {
             for (let o in arr) {
-                if(arr.hasOwnProperty(o)) {
+                if (arr.hasOwnProperty(o)) {
                     resArr[o] = this.callFun(cb, arr[o], arr[o]);
                 }
             }
@@ -65,7 +70,7 @@ const _t = {
         return resArr;
     },
     extend(tar, obj) {
-        for(let p in obj) {
+        for (let p in obj) {
             tar[p] = obj[p];
         }
         return tar;

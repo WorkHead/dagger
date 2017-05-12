@@ -4,7 +4,7 @@
 * */
 import {render, $} from './dagger';
 
-render('templates/test.html', {}, {
+render('templates/test.html', 'test', {
     test: {
         text1: 'text1',
         text2: 'text2',

@@ -15,16 +15,22 @@ class vNode {
 class vTextNode {
     constructor(props) {
         this.text = props.text;
+        this.nodeType = props.nodeType;
     }
 }
 
 function createVNode(...vObj) {
-    return new vNode({
+    let curVnode = new vNode({
         tName: vObj[0],
         attrs: vObj[1],
         nodeType: vObj[2],
         children: vObj[3]
     });
+
+    !$.isVoid(vObj[3]) && $.each(vObj[3], (o) => {
+        o.parent = curVnode;
+    });
+    return curVnode;
 }
 
 function createVTextNode(...vObj) {
