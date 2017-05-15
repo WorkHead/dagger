@@ -7,6 +7,7 @@ class dgComponent {
         this.vDom = props.vDom;
         this.vExp = props.vExp;
         this.conEle = props.conEle;
+        this.scope = props.scope;
     }
 }
 

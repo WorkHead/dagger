@@ -12,34 +12,45 @@ function render(tpl, elem, scope) {
 
     let conEle = $(elem.startsWith('#') ? elem : '#' + elem).getEl(),
         dgObj = new dgComponent({
-            conEle: conEle,
+            conEle: {},
             vDom: {},
-            vExp: ''
+            vExp: '',
+            scope: scope
         }),
         vNode = {};
+
+    bindWatch(dgObj);
+
     if (urlReg.test(tpl)) {
         $.http({
             url: tpl,
-            success(data) {
-                if (!$.isVoid(data)) {
-                    vNode = genVnodeObj(data, scope, dgObj);
-                    dgObj.vDom = vNode;
-                    if($.isArrayLike(conEle) && $.isElement(conEle[0])) {
-
-                        renderToDom(vNode, conEle[0]);
-                    }
-                }
-            }
+            success: init
         });
+    } else {
+        init(tpl)
+    }
+
+    function init(data) {
+        if (!$.isVoid(data) && $.isString(data)) {
+            let hObj = parseHTML(data),
+                vNodeExp = genVnodeExp(hObj);
+            vNode = genVnodeObj(vNodeExp, scope, dgObj);
+            dgObj.vDom = vNode;
+            if ($.isArrayLike(conEle) && $.isElement(conEle[0])) {
+                dgObj.conEle = conEle[0];
+                renderToDom(vNode, conEle[0]);
+            }
+        } else {
+            return new Error('template error');
+        }
     }
 
     return dgObj;
 }
 
-function genVnodeObj(data, scope, dgObj) {
-    let hObj = parseHTML(data),
-        vNodeExp = genVnodeExp(hObj),
-        vNodeFun = new Function('_c', '_ct', 'scope', vNodeExp);
+
+function genVnodeObj(vNodeExp, scope, dgObj) {
+    let vNodeFun = new Function('_c', '_ct', 'scope', vNodeExp);
 
     dgObj.vExp = vNodeExp;
     return vNodeFun(_c, _ct, scope);
@@ -49,8 +60,11 @@ function renderToDom(vNode, ele) {
     let children = vNode.children,
         curEle;
 
-    if(vNode.tName === 'root') {
-        curEle = ele
+    if (vNode.tName === 'root') {
+        curEle = ele;
+        while (curEle.childNodes.length > 0) {
+            curEle.removeChild(curEle.firstChild);
+        }
     } else {
         curEle = createAndAppend(vNode, ele);
     }
@@ -89,8 +103,31 @@ function createAndAppend(vNode, ele) {
 
     vNode.ele = tarEle;
     $.isElement(ele) && (ele.appendChild(tarEle));
-    console.log(ele);
     return tarEle;
+}
+
+function bindWatch(dgObj, key, value) {
+    let scope = dgObj.scope;
+    $.each(scope, (v, k) => {
+        $.defProp(scope, k, () => {
+            if (!$.isVoid(key) && k == key) {
+                return value;
+            }
+            return v;
+        }, (newV) => {
+            if (newV !== v) {
+                bindWatch(dgObj, k, newV);
+                notifyChange(dgObj);
+            }
+        });
+    });
+}
+
+function notifyChange(dgObj) {
+    let newVNode = genVnodeObj(dgObj.vExp, dgObj.scope, dgObj);
+
+    //todo diff
+    renderToDom(newVNode, dgObj.conEle);
 }
 
 export default render;

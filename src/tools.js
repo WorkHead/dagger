@@ -116,6 +116,18 @@ const _t = {
             }
         };
     },
+    defProp(obj, key, getter, setter) {
+        return (this.isFunction(getter) && this.isFunction(setter)) ? Object.defineProperty(obj, key, {
+                enumerable: true,
+                configurable: true,
+                set: setter,
+                get: getter
+            }) : Object.defineProperty(obj, key, {
+                enumerable: true,
+                configurable: true,
+                value: getter
+            });
+    }
 };
 
 export default _t;
