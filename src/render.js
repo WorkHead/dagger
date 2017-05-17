@@ -7,6 +7,7 @@ import {createVNode as _c, createVTextNode as _ct} from './vDom';
 import dgComponent from './component';
 
 const urlReg = /^.?(\/?.+)+\w+\.\w+$/;
+const _cm = $.dMap.bind($);
 
 function render(tpl, elem, scope) {
 
@@ -34,8 +35,8 @@ function render(tpl, elem, scope) {
         if (!$.isVoid(data) && $.isString(data)) {
             let hObj = parseHTML(data),
                 vNodeExp = genVnodeExp(hObj);
-            vNode = genVnodeObj(vNodeExp, scope, dgObj);
 
+            vNode = genVnodeObj(vNodeExp, scope, dgObj);
             dgObj.vDom = vNode;
             if ($.isArrayLike(conEle) && $.isElement(conEle[0])) {
                 dgObj.conEle = conEle[0];
@@ -51,10 +52,10 @@ function render(tpl, elem, scope) {
 
 
 function genVnodeObj(vNodeExp, scope, dgObj) {
-    let vNodeFun = new Function('_c', '_ct', 'scope', vNodeExp);
+    let vNodeFun = new Function('_c', '_ct', '_cm', 'scope', vNodeExp);
 
     dgObj.vExp = vNodeExp;
-    return vNodeFun(_c, _ct, scope);
+    return vNodeFun(_c, _ct, _cm, scope);
 }
 
 function renderToDom(vNode, ele) {
@@ -67,7 +68,7 @@ function renderToDom(vNode, ele) {
             curEle.removeChild(curEle.firstChild);
         }
     } else {
-        if(vNode.shouldRender) {
+        if(vNode.shouldRender || $.isArray(vNode)) {
             curEle = createAndAppend(vNode, ele);
         } else {
             return renderComment(vNode, ele);

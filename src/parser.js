@@ -7,7 +7,8 @@ import {NODETYPES} from './types';
 const tagReg = /<(\/?\w+?\s?)(\:?\w+=(?:"|'|{).+?(?:"|'|})\s?)*>(?:\s*?\n*?\s*?)(.+?)??(?:\s*?\n*?\s*?)(?=<\/?\w+?\s?(?:\:?\w+=(?:"|'|{).+?(?:"|'|})\s?)*>|$)/g,
     attrReg = /(\:?\w+=(?:"|'|{).+?(?:"|'|})\s?)/g,
     bindAttReg = /\{\{.+?\}\}/,
-    expBindReg = /\+|-|\?|!|\*|\/|<|>|\[|\]/g;
+    expBindReg = /\+|-|\?|!|\*|\/|<|>|\[|\]/g,
+    forReg = /(\w+)\s*in\s*(\w+)/;
 
 function parseHTML(html) {
     let stack = [],
@@ -68,7 +69,7 @@ function genVnodeExp(hObj) {
         '}';
 }
 
-function genExp(hObj) {
+function genExp(hObj, genForing) {
     let type = hObj.type,
         parent = hObj.parent,
         attrArr = hObj.attrs,
@@ -78,7 +79,9 @@ function genExp(hObj) {
         shouldRender = 'true',
         resAtt = '{',
         stat = '\"stat\": {',
-        dyn = '\"dyn\": {';
+        dyn = '\"dyn\": {',
+        isFor = false,
+        forExp = '';
 
     if ($.isEmptyArr(attrArr) || $.isVoid(attrArr)) {
         resAtt += '}';
@@ -99,13 +102,14 @@ function genExp(hObj) {
             }
 
             //if
-            if(tmp[0] == ':if') {
+            if (tmp[0] == ':if') {
                 shouldRender = repQuo(tmp[1]);
             }
 
             //for
-            if(tmp[0] == ':for') {
-                //todo genFor
+            if (tmp[0] == ':for') {
+                isFor = true;
+                forExp = tmp[1];
             }
         }
         stat += '}';
@@ -118,7 +122,11 @@ function genExp(hObj) {
         case 1:
             tName = hObj.tName.trim();
             children = hObj.children;
-            return '_c(\"' + tName + '\",' + resAtt + ', ' + type + ', !!(' + shouldRender + ') , [' + genChildren(children) + '])';
+            if (!isFor || genForing) {
+                return '_c(\"' + tName + '\",' + resAtt + ', ' + type + ', !!(' + shouldRender + ') , [' + genChildren(children) + '])';
+            } else {
+                return genForExp(hObj, forExp)
+            }
         case 2:
             text = parseText(hObj.text);
             return '_ct(' + text + ', 2)';
@@ -131,6 +139,16 @@ function genChildren(hObj) {
     return $.dMap(hObj, (o) => {
         return genExp(o);
     });
+}
+
+function genForExp(hObj, forExp) {
+    let res = forExp.match(forReg),
+        arr = res[2],
+        ita = res[1];
+
+    return '_cm(' + arr + ', function(' + ita + '){' +
+        'return ' + genExp(hObj, true) +
+        '})';
 }
 
 // function parseAttr(attrs) {

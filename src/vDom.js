@@ -37,7 +37,7 @@ function createVNode(...vObj) {
         children: vObj[4],
     });
 
-    !$.isVoid(vObj[3]) && $.each(vObj[3], (o) => {
+    !$.isVoid(vObj[4]) && $.each(vObj[4], (o) => {
         o.parent = curVnode;
     });
     return curVnode;
