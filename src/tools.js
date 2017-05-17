@@ -34,6 +34,9 @@ const _t = {
     isEmptyStr(str) {
         return this.isString(str) && str == '';
     },
+    isEmptyArr(arr) {
+        return this.isArray(arr) && arr.length === 0;
+    },
     callFun(fun, ctx) {
         let args = arguments,
             argArr = args[2];

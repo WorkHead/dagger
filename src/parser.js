@@ -1,11 +1,11 @@
 /**
  * Created by tanjiasheng on 2017/5/4.
  */
-import  $ from './myQuery';
+import $ from './myQuery';
 import {NODETYPES} from './types';
 
-const tagReg = /<(\/?\w+?\s?)(\w+=(?:"|'|{).+?(?:"|'|})\s?)*>(?:\s*?\n*?\s*?)(.+?)??(?:\s*?\n*?\s*?)(?=<\/?\w+?\s?(?:\w+=(?:"|'|{).+?(?:"|'|})\s?)*>|$)/g,
-    attrReg = /(\w+=(?:"|'|{).+?(?:"|'|})\s?)/g,
+const tagReg = /<(\/?\w+?\s?)(\:?\w+=(?:"|'|{).+?(?:"|'|})\s?)*>(?:\s*?\n*?\s*?)(.+?)??(?:\s*?\n*?\s*?)(?=<\/?\w+?\s?(?:\:?\w+=(?:"|'|{).+?(?:"|'|})\s?)*>|$)/g,
+    attrReg = /(\:?\w+=(?:"|'|{).+?(?:"|'|})\s?)/g,
     bindAttReg = /\{\{.+?\}\}/,
     expBindReg = /\+|-|\?|!|\*|\/|<|>|\[|\]/g;
 
@@ -25,6 +25,7 @@ function parseHTML(html) {
         let tagName = match[1],
             tagStr = getAttr(match[0]),
             innerText = match[3];
+
         if (!$.isVoid(tagName)) {
             if (!tagName.startsWith('/')) {
                 stack.push(tagName);
@@ -53,13 +54,12 @@ function parseHTML(html) {
             }
         }
     }
-    console.log(resObj);
     return resObj;
 }
 
 function getAttr(str) {
     let res = str.match(attrReg);
-    return $.isArray(res) ? res.join('$$$') : '';
+    return $.isArray(res) ? res : [];
 }
 
 function genVnodeExp(hObj) {
@@ -71,16 +71,54 @@ function genVnodeExp(hObj) {
 function genExp(hObj) {
     let type = hObj.type,
         parent = hObj.parent,
-        attrs,
+        attrArr = hObj.attrs,
         children,
         text,
-        tName;
+        tName,
+        shouldRender = 'true',
+        resAtt = '{',
+        stat = '\"stat\": {',
+        dyn = '\"dyn\": {';
+
+    if ($.isEmptyArr(attrArr) || $.isVoid(attrArr)) {
+        resAtt += '}';
+    } else {
+        for (let i = 0, tmp = []; i < attrArr.length; i++) {
+            //todo  optimize
+            tmp = attrArr[i].split('=');
+            tmp[1] = tmp.slice(1).join('=');
+            if (bindAttReg.test(tmp[1])) {
+                tmp[1] = repBrace(tmp[1]);
+                if (expBindReg.test(tmp[1])) {
+                    dyn += '\"' + tmp[0] + '\": (function(){ return ' + tmp[1] + '})(),';
+                } else {
+                    dyn += '\"' + tmp[0] + '\": ' + tmp[1] + ',';
+                }
+            } else {
+                stat += '\"' + tmp[0] + '\":' + tmp[1] + ',';
+            }
+
+            //if
+            if(tmp[0] == ':if') {
+                shouldRender = repQuo(tmp[1]);
+            }
+
+            //for
+            if(tmp[0] == ':for') {
+                //todo genFor
+            }
+        }
+        stat += '}';
+        dyn += '}';
+        resAtt += stat + ',';
+        resAtt += dyn + '}';
+    }
+
     switch (type) {
         case 1:
             tName = hObj.tName.trim();
-            attrs = parseAttr(hObj.attrs);
             children = hObj.children;
-            return '_c(\"' + tName + '\",' + attrs + ', ' + type + ', [' + genChildren(children) + '])';
+            return '_c(\"' + tName + '\",' + resAtt + ', ' + type + ', !!(' + shouldRender + ') , [' + genChildren(children) + '])';
         case 2:
             text = parseText(hObj.text);
             return '_ct(' + text + ', 2)';
@@ -95,32 +133,31 @@ function genChildren(hObj) {
     });
 }
 
-function parseAttr(attrs) {
-    if ($.isEmptyStr(attrs)) return '{}';
-    let attrArr = attrs.split('$$$'),
-        resAtt = '{',
-        stat = 'stat: {',
-        dyn = 'dyn: {';
-
-    $.each(attrArr, (t) => {
-        let tmp = t.split('=');
-        if (bindAttReg.test(tmp[1])) {
-            tmp[1] = repBrace(tmp[1]);
-            if (expBindReg.test(tmp[1])) {
-                dyn += tmp[0] + ': (function(){ return ' + tmp[1] + '})(),';
-            } else {
-                dyn += tmp[0] + ': ' + tmp[1] + ',';
-            }
-        } else {
-            stat += tmp[0] + ':' + tmp[1] + ',';
-        }
-    });
-    stat += '}';
-    dyn += '}';
-    resAtt += stat + ',';
-    resAtt += dyn + '}';
-    return resAtt;
-}
+// function parseAttr(attrs) {
+//     if ($.isEmptyArr(attrs)) return '{}';
+//     let resAtt = '{',
+//         stat = 'stat: {',
+//         dyn = 'dyn: {';
+//
+//     $.each(attrs, (t) => {
+//         let tmp = t.split('=');
+//         if (bindAttReg.test(tmp[1])) {
+//             tmp[1] = repBrace(tmp[1]);
+//             if (expBindReg.test(tmp[1])) {
+//                 dyn += tmp[0] + ': (function(){ return ' + tmp[1] + '})(),';
+//             } else {
+//                 dyn += tmp[0] + ': ' + tmp[1] + ',';
+//             }
+//         } else {
+//             stat += tmp[0] + ':' + tmp[1] + ',';
+//         }
+//     });
+//     stat += '}';
+//     dyn += '}';
+//     resAtt += stat + ',';
+//     resAtt += dyn + '}';
+//     return resAtt;
+// }
 
 function parseText(txt) {
 
@@ -132,12 +169,16 @@ function parseText(txt) {
             return txt;
         }
     } else {
-        return txt;
+        return '\"' + txt + '\"';
     }
 }
 
 function repBrace(str) {
     return str.replace(/\{|\}|\b/g, '');
+}
+
+function repQuo(str) {
+    return str.replace(/"/g, '');
 }
 
 export {

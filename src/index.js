@@ -8,7 +8,8 @@ let a = {
     text1: 'text1',
     text2: 'text2',
     num1: 1,
-    num3: 3
+    num3: 3,
+    arr:  [1,2,3,4]
 };
 render('templates/test.html', 'test1', a);
 
@@ -19,12 +20,12 @@ let b = {
     num3: 30
 }
 
-render('templates/test.html', 'test2', b)
+// render('templates/test.html', 'test2', b)
 
-setInterval( ()=> {
-    a.num3++;
-}, 1000);
-
-setInterval(()=> {
-    b.num3++;;
-}, 2000)
+// setInterval( ()=> {
+//     a.num3++;
+// }, 1000);
+//
+// setInterval(()=> {
+//     b.num3++;
+// }, 2000)

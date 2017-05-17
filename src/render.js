@@ -35,6 +35,7 @@ function render(tpl, elem, scope) {
             let hObj = parseHTML(data),
                 vNodeExp = genVnodeExp(hObj);
             vNode = genVnodeObj(vNodeExp, scope, dgObj);
+
             dgObj.vDom = vNode;
             if ($.isArrayLike(conEle) && $.isElement(conEle[0])) {
                 dgObj.conEle = conEle[0];
@@ -66,13 +67,24 @@ function renderToDom(vNode, ele) {
             curEle.removeChild(curEle.firstChild);
         }
     } else {
-        curEle = createAndAppend(vNode, ele);
+        if(vNode.shouldRender) {
+            curEle = createAndAppend(vNode, ele);
+        } else {
+            return renderComment(vNode, ele);
+        }
     }
 
     $.each(children, (o) => {
         renderToDom(o, curEle);
     });
 
+}
+
+function renderComment(vNode, ele) {
+    let comment = 'if ---- <' +  vNode.tName + '/> ---- if',
+        com = document.createComment(comment);
+
+    ele.appendChild(com);
 }
 
 function createAndAppend(vNode, ele) {
@@ -102,6 +114,7 @@ function createAndAppend(vNode, ele) {
     });
 
     vNode.ele = tarEle;
+
     $.isElement(ele) && (ele.appendChild(tarEle));
     return tarEle;
 }
