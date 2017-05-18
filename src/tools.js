@@ -23,7 +23,7 @@ const _t = {
     isElement(obj) {
         let eleReg = /\[object HTML(?:\w+?)Element\]/,
             str = this.toString(obj);
-        return eleReg.test(str) || str === '[object DocumentFragment]';
+        return eleReg.test(str) || str === '[object DocumentFragment]' || str === '[object Text]';
     },
     isVoid(obj) {
         return obj === null || obj === void 0 || obj !== obj;

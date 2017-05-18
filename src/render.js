@@ -68,7 +68,12 @@ function renderToDom(vNode, ele) {
             curEle.removeChild(curEle.firstChild);
         }
     } else {
-        if(vNode.shouldRender || $.isArray(vNode)) {
+        if (vNode.shouldRender || $.isArray(vNode)) {
+            if ($.isArray(vNode)) {
+                $.each(vNode, (n) => {
+                    renderToDom(n, ele);
+                });
+            }
             curEle = createAndAppend(vNode, ele);
         } else {
             return renderComment(vNode, ele);
@@ -82,7 +87,7 @@ function renderToDom(vNode, ele) {
 }
 
 function renderComment(vNode, ele) {
-    let comment = 'if ---- <' +  vNode.tName + '/> ---- if',
+    let comment = 'if ---- <' + vNode.tName + '/> ---- if',
         com = document.createComment(comment);
 
     ele.appendChild(com);
@@ -116,7 +121,9 @@ function createAndAppend(vNode, ele) {
 
     vNode.ele = tarEle;
 
-    $.isElement(ele) && (ele.appendChild(tarEle));
+    if ($.isElement(ele) && ($.isElement(tarEle))) {
+        ele.appendChild(tarEle)
+    }
     return tarEle;
 }
 
