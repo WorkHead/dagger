@@ -65,6 +65,7 @@ function renderToDom(vNode, ele) {
     if (vNode.tName === 'root') {
         curEle = ele;
         while (curEle.childNodes.length > 0) {
+            //todo diff
             curEle.removeChild(curEle.firstChild);
         }
     } else {
@@ -127,8 +128,13 @@ function createAndAppend(vNode, ele) {
     return tarEle;
 }
 
-function bindWatch(dgObj, key, value) {
+function bindWatch(dgObj) {
     let scope = dgObj.scope;
+    defineReactive(scope, dgObj);
+}
+
+//todo optimize arguments
+function defineReactive(scope, dgObj, key, value) {
     $.each(scope, (v, k) => {
         $.defProp(scope, k, () => {
             if (!$.isVoid(key) && k == key) {
@@ -137,10 +143,16 @@ function bindWatch(dgObj, key, value) {
             return v;
         }, (newV) => {
             if (newV !== v) {
-                bindWatch(dgObj, k, newV);
+                defineReactive(scope, dgObj, k, newV);
                 notifyChange(dgObj);
             }
         });
+
+        if ($.isObject(v)) {
+            defineReactive(v, dgObj);
+        } else if ($.isArray(v)) {
+            hijackArrProto(v, dgObj);
+        }
     });
 }
 
@@ -149,6 +161,28 @@ function notifyChange(dgObj) {
 
     //todo diff
     renderToDom(newVNode, dgObj.conEle);
+}
+
+//watch array changes by override Array.prototype
+function hijackArrProto(arr, dgObj) {
+    let fakeProto = Object.create(Array.prototype),
+        arrayFuns = ['push', 'pop', 'shift', 'unshift', 'splice', 'sort', 'reverse'];
+
+    $.each(arrayFuns, (f) => {
+        $.defProp(fakeProto, f, function () {//ES6 arrow functions can't
+            let args = Array.prototype.slice.call(arguments),
+                res = Array.prototype[f].apply(arr, args);
+
+            notifyChange(dgObj);
+
+            //rewatch
+            defineReactive(arr, dgObj);
+
+            return res;
+        });
+    });
+
+    arr.__proto__ = fakeProto;
 }
 
 export default render;

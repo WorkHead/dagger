@@ -128,6 +128,7 @@ const _t = {
             }) : Object.defineProperty(obj, key, {
                 enumerable: true,
                 configurable: true,
+                writable: true,
                 value: getter
             });
     }

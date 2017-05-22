@@ -9,9 +9,23 @@ let a = {
     text2: 'text2',
     num1: 1,
     num3: 3,
-    arr:  [1,2,3,4]
+    arr:  [1,2,3,4],
+    obj: {
+        qq: 1,
+        bb: {
+            cc: 2
+        }
+    }
 };
 render('templates/test.html', 'test1', a);
+
+setTimeout(() => {
+    a.arr.push(5);
+}, 1000);
+
+setTimeout(() => {
+    a.arr.push(6);
+}, 2000);
 
 let b = {
     text1: 'mmmmmmmmmmmmm',
