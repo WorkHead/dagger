@@ -8,6 +8,7 @@ import _t from './tools';
 function Query(selector) {
     this.el = {};
     _t.isString(selector) && (this.el = document.querySelectorAll(selector));
+    _t.isElement(selector) && (this.el = selector);
 }
 
 

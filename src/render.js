@@ -161,15 +161,16 @@ function notifyChange(dgObj) {
 
     //todo diff
     renderToDom(newVNode, dgObj.conEle);
+    dgObj.vNode = newVNode;
 }
 
-//watch array changes by override Array.prototype
+//watch array changes by overriding Array.prototype
 function hijackArrProto(arr, dgObj) {
     let fakeProto = Object.create(Array.prototype),
         arrayFuns = ['push', 'pop', 'shift', 'unshift', 'splice', 'sort', 'reverse'];
 
     $.each(arrayFuns, (f) => {
-        $.defProp(fakeProto, f, function () {//ES6 arrow functions can't
+        $.defProp(fakeProto, f, function () {//ES6 arrow functions can't read arguments
             let args = Array.prototype.slice.call(arguments),
                 res = Array.prototype[f].apply(arr, args);
 

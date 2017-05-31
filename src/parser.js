@@ -6,7 +6,7 @@ import {NODETYPES} from './types';
 
 const tagReg = /<(\/?\w+?\s?)(\:?\w+=(?:"|'|{).+?(?:"|'|})\s?)*>(?:\s*?\n*?\s*?)(.+?)??(?:\s*?\n*?\s*?)(?=<\/?\w+?\s?(?:\:?\w+=(?:"|'|{).+?(?:"|'|})\s?)*>|$)/g,
     attrReg = /(\:?\w+=(?:"|'|{).+?(?:"|'|})\s?)/g,
-    bindAttReg = /\{\{.+?\}\}/,
+    bindAttReg = /(\:\w+=)|(\{\{.+?\}\})/,
     expBindReg = /\+|-|\?|!|\*|\/|<|>|\[|\]/g,
     forReg = /(\w+)\s*in\s*(\w+)/;
 
@@ -131,7 +131,7 @@ function genExp(hObj, genForing) {
             text = parseText(hObj.text);
             return '_ct(' + text + ', 2)';
         default:
-            return '_c(\"div\", {}, 1, [])';
+            return '_c(\"div\", {},1 ,true , [])';
     }
 }
 

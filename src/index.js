@@ -15,7 +15,9 @@ let a = {
         bb: {
             cc: 2
         }
-    }
+    },
+    dd: 'dddddddd'
+
 };
 render('templates/test.html', 'test1', a);
 
