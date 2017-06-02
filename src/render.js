@@ -5,6 +5,7 @@ import $ from './myQuery';
 import {parseHTML, genVnodeExp} from './parser';
 import {createVNode as _c, createVTextNode as _ct} from './vDom';
 import dgComponent from './component';
+import diff from './diff'
 
 const urlReg = /^.?(\/?.+)+\w+\.\w+$/;
 const _cm = $.dMap.bind($);
@@ -37,7 +38,7 @@ function render(tpl, elem, scope) {
                 vNodeExp = genVnodeExp(hObj);
 
             vNode = genVnodeObj(vNodeExp, scope, dgObj);
-            dgObj.vDom = vNode;
+            dgObj.vNode = vNode;
             if ($.isArrayLike(conEle) && $.isElement(conEle[0])) {
                 dgObj.conEle = conEle[0];
                 renderToDom(vNode, conEle[0]);
@@ -64,6 +65,7 @@ function renderToDom(vNode, ele) {
 
     if (vNode.tName === 'root') {
         curEle = ele;
+        vNode.ele = ele;
         while (curEle.childNodes.length > 0) {
             //todo diff
             curEle.removeChild(curEle.firstChild);
@@ -117,6 +119,7 @@ function createAndAppend(vNode, ele) {
     });
 
     $.each(dynAtt, (y, ay) => {
+        //todo view2model data bind
         tarEle.setAttribute(ay, y);
     });
 
@@ -161,6 +164,8 @@ function notifyChange(dgObj) {
 
     //todo diff
     renderToDom(newVNode, dgObj.conEle);
+
+    diff(dgObj.vNode, newVNode);
     dgObj.vNode = newVNode;
 }
 

@@ -4,7 +4,7 @@
 <p :if="num1 <= 1">aaaaaaaaaaaaaaaa123123123</p>
 <div>{{text2}}</div>
 <p :for="a in arr">
-    <span :if="a > 2">{{a}}</span>
+    <span :if="a > 2">{{$index + ':' + a}}</span>
 </p>
 <span>{{obj.bb.cc}}</span>
 <input :model="dd"></input>

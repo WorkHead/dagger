@@ -6,7 +6,7 @@ import {NODETYPES} from './types';
 
 const tagReg = /<(\/?\w+?\s?)(\:?\w+=(?:"|'|{).+?(?:"|'|})\s?)*>(?:\s*?\n*?\s*?)(.+?)??(?:\s*?\n*?\s*?)(?=<\/?\w+?\s?(?:\:?\w+=(?:"|'|{).+?(?:"|'|})\s?)*>|$)/g,
     attrReg = /(\:?\w+=(?:"|'|{).+?(?:"|'|})\s?)/g,
-    bindAttReg = /(\:\w+=)|(\{\{.+?\}\})/,
+    bindAttReg = /(\:\w+)|(\{\{.+?\}\})/,
     expBindReg = /\+|-|\?|!|\*|\/|<|>|\[|\]/g,
     forReg = /(\w+)\s*in\s*(\w+)/;
 
@@ -90,7 +90,7 @@ function genExp(hObj, genForing) {
             //todo  optimize
             tmp = attrArr[i].split('=');
             tmp[1] = tmp.slice(1).join('=');
-            if (bindAttReg.test(tmp[1])) {
+            if (bindAttReg.test(tmp[1]) || bindAttReg.test(tmp[0])) {
                 tmp[1] = repBrace(tmp[1]);
                 if (expBindReg.test(tmp[1])) {
                     dyn += '\"' + tmp[0] + '\": (function(){ return ' + tmp[1] + '})(),';
@@ -146,7 +146,7 @@ function genForExp(hObj, forExp) {
         arr = res[2],
         ita = res[1];
 
-    return '_cm(' + arr + ', function(' + ita + '){' +
+    return '_cm(' + arr + ', function(' + ita + ', $index){' +
         'return ' + genExp(hObj, true) +
         '})';
 }
