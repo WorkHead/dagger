@@ -2,23 +2,18 @@
  * Created by tanjiasheng on 2017/5/15.
  */
 import $ from "./myQuery";
+import {renderToDom} from './render'
 
-class patch {
-    constructor(props) {
-
-    }
-}
-
-function diff(vNode, newVNode) {
+function diff(vNode, newVNode, father) {
     console.log(vNode, newVNode);
     if (vNode.tName == 'root') {
-        return diffChildren(vNode.children, newVNode.children);
+        return diffChildren(vNode.children, newVNode.children, vNode.ele);
     }
     let tarEle = vNode.ele;
     $.each(newVNode, (v, k) => {
         switch (k) {
             case 'attrs':
-                //dynamic attributes only
+                //only dynamic attributes need to be diffed
                 diffAttr(vNode.attrs.dyn, newVNode.attrs.dyn, tarEle);
                 break;
             case 'nodeType':
@@ -27,7 +22,11 @@ function diff(vNode, newVNode) {
                 }
                 break;
             case 'children':
-                diffChildren(vNode.children, v);
+                if(vNode.children.length === v.length){
+                    diffChildren(vNode.children, v);
+                } else {
+
+                }
                 break;
             default:
                 break;
@@ -36,7 +35,9 @@ function diff(vNode, newVNode) {
 }
 
 function diffChildren(children, newChildren) {
+    $.each(newChildren, () => {
 
+    });
 }
 
 function diffAttr(attr, newAttr, tarEle) {
@@ -45,6 +46,10 @@ function diffAttr(attr, newAttr, tarEle) {
             tarEle.setAttribute(k, v);
         }
     });
+}
+
+function updateEle(ele, vNode) {
+
 }
 
 export default diff;

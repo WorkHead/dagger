@@ -5,7 +5,6 @@ import $ from './myQuery';
 import {parseHTML, genVnodeExp} from './parser';
 import {createVNode as _c, createVTextNode as _ct} from './vDom';
 import dgComponent from './component';
-import diff from './diff'
 
 const urlReg = /^.?(\/?.+)+\w+\.\w+$/;
 const _cm = $.dMap.bind($);
@@ -191,4 +190,7 @@ function hijackArrProto(arr, dgObj) {
     arr.__proto__ = fakeProto;
 }
 
-export default render;
+export {
+    render,
+    renderToDom
+}
