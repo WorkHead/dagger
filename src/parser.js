@@ -1,7 +1,7 @@
 /**
  * Created by tanjiasheng on 2017/5/4.
  */
-import $ from './myQuery';
+import $ from './query';
 import {NODETYPES} from './types';
 
 const tagReg = /<(\/?\w+?\s?)(\:?\w+=(?:"|'|{).+?(?:"|'|})\s?)*>(?:\s*?\n*?\s*?)(.+?)??(?:\s*?\n*?\s*?)(?=<\/?\w+?\s?(?:\:?\w+=(?:"|'|{).+?(?:"|'|})\s?)*>|$)/g,

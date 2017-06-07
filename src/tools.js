@@ -131,6 +131,12 @@ const _t = {
                 writable: true,
                 value: getter
             });
+    },
+    createEle(tName) {
+        return document.createElement(tName);
+    },
+    createTxtNode(txt) {
+        return document.createTextNode(txt);
     }
 };
 

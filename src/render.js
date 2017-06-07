@@ -1,10 +1,11 @@
 /**
  * Created by tanjiasheng on 2017/5/5.
  */
-import $ from './myQuery';
+import $ from './query';
 import {parseHTML, genVnodeExp} from './parser';
 import {createVNode as _c, createVTextNode as _ct} from './vDom';
 import dgComponent from './component';
+import diff from './diff'
 
 const urlReg = /^.?(\/?.+)+\w+\.\w+$/;
 const _cm = $.dMap.bind($);
@@ -86,6 +87,7 @@ function renderToDom(vNode, ele) {
         renderToDom(o, curEle);
     });
 
+    return curEle;
 }
 
 function renderComment(vNode, ele) {
@@ -93,6 +95,8 @@ function renderComment(vNode, ele) {
         com = document.createComment(comment);
 
     ele.appendChild(com);
+
+    vNode.ele = com;
 }
 
 function createAndAppend(vNode, ele) {
@@ -106,10 +110,10 @@ function createAndAppend(vNode, ele) {
             attrs = vNode.attrs;
             statAtt = attrs.stat;
             dynAtt = attrs.dyn;
-            tarEle = document.createElement(vNode.tName);
+            tarEle = $.createEle(vNode.tName);
             break;
         case 2:
-            tarEle = document.createTextNode(vNode.text);
+            tarEle = $.createTxtNode(vNode.text);
             break;
     }
 
@@ -162,10 +166,10 @@ function notifyChange(dgObj) {
     let newVNode = genVnodeObj(dgObj.vExp, dgObj.scope, dgObj);
 
     //todo diff
-    renderToDom(newVNode, dgObj.conEle);
+    // renderToDom(newVNode, dgObj.conEle);
 
     diff(dgObj.vNode, newVNode);
-    dgObj.vNode = newVNode;
+    // dgObj.vNode = newVNode;
 }
 
 //watch array changes by overriding Array.prototype

@@ -1,7 +1,7 @@
 /**
  * Created by tanjiasheng on 2017/5/9.
  */
-import $ from './myQuery';
+import $ from './query';
 
 class vNode {
     constructor(props) {
@@ -24,6 +24,7 @@ class vTextNode {
 class vComment {
     constructor (props) {
         this.text = props.text;
+        this.nodeType = props.nodeType;
     }
 }
 
@@ -52,7 +53,8 @@ function createVTextNode(...vObj) {
 
 function createComment(...vObj) {
     return new vComment({
-        text: vObj[0]
+        text: vObj[0],
+        nodeType: vObj[1]
     });
 }
 
