@@ -22,20 +22,18 @@ function diff(vNode, newVNode, father) {
                 }
                 break;
             case 'children':
-                if(vNode.children.length === v.length){
-                    diffChildren(vNode.children, v);
-                } else {
-                    updateEle(tarEle, v)
-                }
+                diffChildren(vNode.children, v, tarEle);
                 break;
             case 'shouldRender':
                 if(v !== vNode[k]) {
                     father.replaceChild(renderToDom(newVNode, $.createEle(newVNode.tName)), tarEle);
+                    vNode[k] = v;
                 }
                 break;
             case 'text':
                 if(v !== vNode[k]) {
                     father.innerText = v;
+                    vNode[k] = v;
                 }
                 break;
             default:
@@ -72,11 +70,12 @@ function diffArr(arr, newArr, ele) {
             arr.push(na);
         }
     });
-    //todo what if newArr length less than arr length
-}
-
-function updateEle(ele, vNode) {
-    renderToDom(vNode)
+    if(arr.length > newArr.length) {
+        let toDel = arr.splice(newArr.length);
+        $.each(toDel, (d) => {
+           ele.removeChild(d);
+        });
+    }
 }
 
 export default diff;

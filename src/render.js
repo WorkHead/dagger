@@ -95,8 +95,8 @@ function renderComment(vNode, ele) {
         com = document.createComment(comment);
 
     ele.appendChild(com);
-
     vNode.ele = com;
+    return com;
 }
 
 function createAndAppend(vNode, ele) {
@@ -105,6 +105,7 @@ function createAndAppend(vNode, ele) {
         statAtt,
         dynAtt,
         tarEle;
+
     switch (type) {
         case 1:
             attrs = vNode.attrs;
@@ -136,6 +137,7 @@ function createAndAppend(vNode, ele) {
 
 function bindWatch(dgObj) {
     let scope = dgObj.scope;
+
     defineReactive(scope, dgObj);
 }
 

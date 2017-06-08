@@ -7,7 +7,7 @@ import {render, $} from '../src/dagger';
 let a = {
     text1: 'text1',
     text2: 'text2',
-    num1: 1,
+    num1: 2,
     num3: 3,
     arr:  [1,2,3,4],
     obj: {
@@ -26,7 +26,7 @@ setTimeout(() => {
 }, 1000);
 
 setTimeout(() => {
-    a.arr.push(6);
+    a.text1 = 'bbbbbbbbbbbbbbb';
 }, 2000);
 
 let b = {

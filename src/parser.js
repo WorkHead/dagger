@@ -22,6 +22,7 @@ function parseHTML(html) {
         },
         parObj = {},
         curObj = resObj;
+
     while (match = tagReg.exec(html)) {
         let tagName = match[1],
             tagStr = getAttr(match[0]),
