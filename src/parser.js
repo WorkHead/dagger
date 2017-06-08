@@ -5,7 +5,7 @@ import $ from './query';
 import {NODETYPES} from './types';
 
 const tagReg = /<(\/?\w+?\s?)(\:?\w+=(?:"|'|{).+?(?:"|'|})\s?)*>(?:\s*?\n*?\s*?)(.+?)??(?:\s*?\n*?\s*?)(?=<\/?\w+?\s?(?:\:?\w+=(?:"|'|{).+?(?:"|'|})\s?)*>|$)/g,
-    attrReg = /(\:?\w+=(?:"|'|{).+?(?:"|'|})\s?)/g,
+    attrReg = /(\:?\w+=((".+?")|({.+?})|('.+?'))\s?)/g,
     bindAttReg = /(\:\w+)|(\{\{.+?\}\})/,
     expBindReg = /\+|-|\?|!|\*|\/|<|>|\[|\]/g,
     forReg = /(\w+)\s*in\s*(\w+)/;
@@ -82,7 +82,8 @@ function genExp(hObj, genForing) {
         stat = '\"stat\": {',
         dyn = '\"dyn\": {',
         isFor = false,
-        forExp = '';
+        forExp = '',
+        classObj = '{}';
 
     if ($.isEmptyArr(attrArr) || $.isVoid(attrArr)) {
         resAtt += '}';
@@ -93,11 +94,7 @@ function genExp(hObj, genForing) {
             tmp[1] = tmp.slice(1).join('=');
             if (bindAttReg.test(tmp[1]) || bindAttReg.test(tmp[0])) {
                 tmp[1] = repBrace(tmp[1]);
-                if (expBindReg.test(tmp[1])) {
-                    dyn += '\"' + tmp[0] + '\": (function(){ return ' + tmp[1] + '})(),';
-                } else {
-                    dyn += '\"' + tmp[0] + '\": ' + tmp[1] + ',';
-                }
+                dyn += '\"' + tmp[0] + '\": ' + tmp[1] + ',';
             } else {
                 stat += '\"' + tmp[0] + '\":' + tmp[1] + ',';
             }
@@ -112,6 +109,11 @@ function genExp(hObj, genForing) {
                 isFor = true;
                 forExp = tmp[1];
             }
+
+            //class
+            if(tmp[0] == ':class') {
+                classObj = repQuo(tmp[1]);
+            }
         }
         stat += '}';
         dyn += '}';
@@ -124,7 +126,7 @@ function genExp(hObj, genForing) {
             tName = hObj.tName.trim();
             children = hObj.children;
             if (!isFor || genForing) {
-                return '_c(\"' + tName + '\",' + resAtt + ', ' + type + ', !!(' + shouldRender + ') , [' + genChildren(children) + '])';
+                return '_c(\"' + tName + '\",' + resAtt + ', ' + type + ', !!(' + shouldRender + ') ,' + classObj + ',  [' + genChildren(children) + '])';
             } else {
                 return genForExp(hObj, forExp)
             }
@@ -132,7 +134,7 @@ function genExp(hObj, genForing) {
             text = parseText(hObj.text);
             return '_ct(' + text + ', 2)';
         default:
-            return '_c(\"div\", {},1 ,true , [])';
+            return '_c(\"div\", {},1 ,true , {}, [])';
     }
 }
 
@@ -193,7 +195,7 @@ function parseText(txt) {
 }
 
 function repBrace(str) {
-    return str.replace(/\{|\}|\b/g, '');
+    return str.replace(/\{{2}|\}{2}|\b/g, '');
 }
 
 function repQuo(str) {

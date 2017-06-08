@@ -10,6 +10,7 @@ class vNode {
         this.children = props.children;
         this.nodeType = props.nodeType;
         this.shouldRender = props.shouldRender;
+        this.classObj = props.classObj;
     }
 }
 
@@ -35,10 +36,11 @@ function createVNode(...vObj) {
         attrs: vObj[1],
         nodeType: vObj[2],
         shouldRender: vObj[3],
-        children: vObj[4],
+        classObj: vObj[4],
+        children: vObj[5],
     });
 
-    !$.isVoid(vObj[4]) && $.each(vObj[4], (o) => {
+    !$.isVoid(vObj[5]) && $.each(vObj[5], (o) => {
         o.parent = curVnode;
     });
     return curVnode;

@@ -104,13 +104,15 @@ function createAndAppend(vNode, ele) {
         attrs,
         statAtt,
         dynAtt,
-        tarEle;
+        tarEle,
+        classObj;
 
     switch (type) {
         case 1:
             attrs = vNode.attrs;
             statAtt = attrs.stat;
             dynAtt = attrs.dyn;
+            classObj = vNode.classObj;
             tarEle = $.createEle(vNode.tName);
             break;
         case 2:
@@ -125,6 +127,12 @@ function createAndAppend(vNode, ele) {
     $.each(dynAtt, (y, ay) => {
         //todo view2model data bind
         tarEle.setAttribute(ay, y);
+    });
+
+    $.each(classObj, (l, al) => {
+        if(l) {
+            $(tarEle).addClass(al);
+        }
     });
 
     vNode.ele = tarEle;

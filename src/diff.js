@@ -14,12 +14,8 @@ function diff(vNode, newVNode, father) {
             case 'attrs':
                 //only dynamic attributes need to be diffed
                 diffAttr(vNode.attrs.dyn, v.dyn, tarEle);
+                //todo update when changed only
                 vNode.attrs.dyn = v.dyn;
-                break;
-            case 'tName':
-                if (v !== vNode[k]) {
-                    father.replaceChild(renderToDom(newVNode, $.createEle(newVNode.tName)), tarEle);
-                }
                 break;
             case 'children':
                 diffChildren(vNode.children, v, tarEle);
@@ -35,6 +31,11 @@ function diff(vNode, newVNode, father) {
                     father.innerText = v;
                     vNode[k] = v;
                 }
+                break;
+            case 'classObj':
+                diffClass(vNode.classObj, v, tarEle);
+                //todo update when changed only
+                vNode.classObj = v;
                 break;
             default:
                 break;
@@ -73,9 +74,19 @@ function diffArr(arr, newArr, ele) {
     if(arr.length > newArr.length) {
         let toDel = arr.splice(newArr.length);
         $.each(toDel, (d) => {
-           ele.removeChild(d);
+           ele.removeChild(d.ele);
         });
     }
+}
+
+function diffClass(classObj, newClassObj, ele) {
+    $.each(newClassObj, (v, k) => {
+        if(v && !classObj[k]) {
+            $(ele).addClass(k);
+        } else if (!v && classObj[k]) {
+            $(ele).removeClass(k);
+        }
+    });
 }
 
 export default diff;
