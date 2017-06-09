@@ -50,7 +50,7 @@ function parseHTML(html) {
                 }
             } else {
                 let cloTagName = tagName.slice(1);
-                if (stack.pop().trim() !== cloTagName.trim()) return new Error('template parse Error!');
+                if (stack.pop().trim() !== cloTagName.trim()) throw new Error('template parse Error!');
                 curObj = curObj.parent;
                 parObj = parObj.parent;
             }

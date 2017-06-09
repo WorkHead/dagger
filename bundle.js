@@ -231,7 +231,7 @@ function parseHTML(html) {
                 }
             } else {
                 let cloTagName = tagName.slice(1);
-                if (stack.pop().trim() !== cloTagName.trim()) return new Error('template parse Error!');
+                if (stack.pop().trim() !== cloTagName.trim()) throw new Error('template parse Error!');
                 curObj = curObj.parent;
                 parObj = parObj.parent;
             }
@@ -512,7 +512,7 @@ function render(tpl, elem, scope) {
                 renderToDom(vNode, conEle[0]);
             }
         } else {
-            return new Error('template error');
+            throw new Error('template error');
         }
     }
 

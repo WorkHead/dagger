@@ -22,7 +22,7 @@ let a = {
 render('templates/test.html', 'test1', a);
 
 setTimeout(() => {
-    a.num1 = 0;
+    a.arr.push(100)
 }, 1000);
 
 setTimeout(() => {

@@ -44,7 +44,7 @@ function render(tpl, elem, scope) {
                 renderToDom(vNode, conEle[0]);
             }
         } else {
-            return new Error('template error');
+            throw new Error('template error');
         }
     }
 
@@ -55,7 +55,11 @@ function render(tpl, elem, scope) {
 function genVnodeObj(vNodeExp, scope, dgObj) {
     let vNodeFun = new Function('_c', '_ct', '_cm', 'scope', vNodeExp);
 
-    dgObj.vExp = vNodeExp;
+    try {
+        dgObj.vExp = vNodeExp;
+    } catch (e) {
+        throw new Error('template parse error');
+    }
     return vNodeFun(_c, _ct, _cm, scope);
 }
 
@@ -175,11 +179,7 @@ function defineReactive(scope, dgObj, key, value) {
 function notifyChange(dgObj) {
     let newVNode = genVnodeObj(dgObj.vExp, dgObj.scope, dgObj);
 
-    //todo diff
-    // renderToDom(newVNode, dgObj.conEle);
-
     diff(dgObj.vNode, newVNode);
-    // dgObj.vNode = newVNode;
 }
 
 //watch array changes by overriding Array.prototype
