@@ -42,6 +42,7 @@ function render(tpl, elem, scope) {
             if ($.isArrayLike(conEle) && $.isElement(conEle[0])) {
                 dgObj.conEle = conEle[0];
                 renderToDom(vNode, conEle[0]);
+                $.callFun(dgObj.onLoad, dgObj);
             }
         } else {
             throw new Error('template error');
@@ -57,10 +58,10 @@ function genVnodeObj(vNodeExp, scope, dgObj) {
 
     try {
         dgObj.vExp = vNodeExp;
+        return vNodeFun(_c, _ct, _cm, scope);
     } catch (e) {
         throw new Error('template parse error');
     }
-    return vNodeFun(_c, _ct, _cm, scope);
 }
 
 function renderToDom(vNode, ele) {
@@ -180,6 +181,7 @@ function notifyChange(dgObj) {
     let newVNode = genVnodeObj(dgObj.vExp, dgObj.scope, dgObj);
 
     diff(dgObj.vNode, newVNode);
+    $.callFun(dgObj.onUpdate, dgObj);
 }
 
 //watch array changes by overriding Array.prototype

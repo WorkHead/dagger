@@ -114,6 +114,11 @@ function genExp(hObj, genForing) {
             if(tmp[0] == ':class') {
                 classObj = repQuo(tmp[1]);
             }
+
+            //model
+            if(tmp[0] == ':model') {
+
+            }
         }
         stat += '}';
         dyn += '}';

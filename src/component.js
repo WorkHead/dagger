@@ -9,6 +9,12 @@ class dgComponent {
         this.conEle = props.conEle;
         this.scope = props.scope;
     }
+    onLoad() {
+        console.info('load success');
+    }
+    onUpdate() {
+        console.info('update success');
+    }
 }
 
 export default dgComponent;
