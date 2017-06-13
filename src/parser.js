@@ -8,7 +8,8 @@ const tagReg = /<(\/?\w+?\s?)(\:?\w+=(?:"|'|{).+?(?:"|'|})\s?)*>(?:\s*?\n*?\s*?)
     attrReg = /(\:?\w+=((".+?")|({.+?})|('.+?'))\s?)/g,
     bindAttReg = /(\:\w+)|(\{\{.+?\}\})/,
     expBindReg = /\+|-|\?|!|\*|\/|<|>|\[|\]/g,
-    forReg = /(\w+)\s*in\s*(\w+)/;
+    forReg = /(\w+)\s*in\s*(\w+)/,
+    eventReg = /^\:((click)|(input)|(change)|(touchstart)|(touchmove)|(touchend)|(scroll))$/;
 
 function parseHTML(html) {
     let stack = [],
@@ -83,7 +84,8 @@ function genExp(hObj, genForing) {
         dyn = '\"dyn\": {',
         isFor = false,
         forExp = '',
-        classObj = '{}';
+        classObj = '{}',
+        events = '{';
 
     if ($.isEmptyArr(attrArr) || $.isVoid(attrArr)) {
         resAtt += '}';
@@ -117,7 +119,12 @@ function genExp(hObj, genForing) {
 
             //model
             if(tmp[0] == ':model') {
+                dyn += '"value":' + repQuo(tmp[1]) + ',';
+            }
 
+            //events
+            if(eventReg.test(tmp[0])) {
+                events +=  '"' + repCol(tmp[0]) + '": ' + repQuo(tmp[1]) + ',';
             }
         }
         stat += '}';
@@ -126,20 +133,22 @@ function genExp(hObj, genForing) {
         resAtt += dyn + '}';
     }
 
+    events += '}';
+
     switch (type) {
         case 1:
             tName = hObj.tName.trim();
             children = hObj.children;
             if (!isFor || genForing) {
-                return '_c(\"' + tName + '\",' + resAtt + ', ' + type + ', !!(' + shouldRender + ') ,' + classObj + ',  [' + genChildren(children) + '])';
+                return '_c(\"' + tName + '\",' + resAtt + ', ' + type + ', !!(' + shouldRender + ') ,' + classObj + ', '+ events + ', [' + genChildren(children) + '])';
             } else {
-                return genForExp(hObj, forExp)
+                return genForExp(hObj, forExp);
             }
         case 2:
             text = parseText(hObj.text);
             return '_ct(' + text + ', 2)';
         default:
-            return '_c(\"div\", {},1 ,true , {}, [])';
+            return '_c(\"div\", {}, 1 ,true, {}, {}, [])';
     }
 }
 
@@ -205,6 +214,10 @@ function repBrace(str) {
 
 function repQuo(str) {
     return str.replace(/"/g, '');
+}
+
+function repCol(str) {
+    return str.replace(':', '');
 }
 
 export {

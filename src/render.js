@@ -41,7 +41,7 @@ function render(tpl, elem, scope) {
             dgObj.vNode = vNode;
             if ($.isArrayLike(conEle) && $.isElement(conEle[0])) {
                 dgObj.conEle = conEle[0];
-                renderToDom(vNode, conEle[0]);
+                renderToDom(vNode, conEle[0], scope);
                 $.callFun(dgObj.onLoad, dgObj);
             }
         } else {
@@ -64,7 +64,7 @@ function genVnodeObj(vNodeExp, scope, dgObj) {
     }
 }
 
-function renderToDom(vNode, ele) {
+function renderToDom(vNode, ele, scope) {
     let children = vNode.children,
         curEle;
 
@@ -79,17 +79,17 @@ function renderToDom(vNode, ele) {
         if (vNode.shouldRender || $.isArray(vNode)) {
             if ($.isArray(vNode)) {
                 $.each(vNode, (n) => {
-                    renderToDom(n, ele);
+                    renderToDom(n, ele, scope);
                 });
             }
-            curEle = createAndAppend(vNode, ele);
+            curEle = createAndAppend(vNode, ele, scope);
         } else {
             return renderComment(vNode, ele);
         }
     }
 
     $.each(children, (o) => {
-        renderToDom(o, curEle);
+        renderToDom(o, curEle, scope);
     });
 
     return curEle;
@@ -104,13 +104,14 @@ function renderComment(vNode, ele) {
     return com;
 }
 
-function createAndAppend(vNode, ele) {
+function createAndAppend(vNode, ele, scope) {
     let type = vNode.nodeType,
         attrs,
         statAtt,
         dynAtt,
         tarEle,
-        classObj;
+        classObj,
+        events;
 
     switch (type) {
         case 1:
@@ -118,6 +119,7 @@ function createAndAppend(vNode, ele) {
             statAtt = attrs.stat;
             dynAtt = attrs.dyn;
             classObj = vNode.classObj;
+            events = vNode.events;
             tarEle = $.createEle(vNode.tName);
             break;
         case 2:
@@ -130,14 +132,20 @@ function createAndAppend(vNode, ele) {
     });
 
     $.each(dynAtt, (y, ay) => {
-        //todo view2model data bind
         tarEle.setAttribute(ay, y);
+        if(ay == ':model') {
+            bindModel(tarEle, scope, y);
+        }
     });
 
     $.each(classObj, (l, al) => {
         if(l) {
             $(tarEle).addClass(al);
         }
+    });
+
+    $.each(events, (v, av) => {
+        tarEle.addEventListener(av, v);
     });
 
     vNode.ele = tarEle;
@@ -152,6 +160,12 @@ function bindWatch(dgObj) {
     let scope = dgObj.scope;
 
     defineReactive(scope, dgObj);
+}
+
+function bindModel(ele, scope, value) {
+    ele.addEventListener('input', (e) => {
+       scope[value] = ele.value;
+    });
 }
 
 //todo optimize arguments
@@ -180,7 +194,7 @@ function defineReactive(scope, dgObj, key, value) {
 function notifyChange(dgObj) {
     let newVNode = genVnodeObj(dgObj.vExp, dgObj.scope, dgObj);
 
-    diff(dgObj.vNode, newVNode);
+    diff(dgObj.vNode, newVNode, dgObj.conEle, dgObj.scope);
     $.callFun(dgObj.onUpdate, dgObj);
 }
 

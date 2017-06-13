@@ -16,7 +16,10 @@ let a = {
             cc: 2
         }
     },
-    dd: 'dddddddd'
+    dd: 'dddddddd',
+    ckck: function () {
+        console.log('ckck');
+    }
 
 };
 render('templates/test.html', 'test1', a);
