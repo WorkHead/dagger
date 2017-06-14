@@ -2,9 +2,12 @@ const webpack = require('webpack');
 const path = require('path');
 
 module.exports = {
-    entry: './example/index.js',
+    entry: {
+        example:  './example/index.js',
+        playground: './playground/index.js'
+    },
     output: {
-        filename: 'dagger.min.js',
+        filename: '[name].min.js',
         path: __dirname + '/dest'
     },
     module: {

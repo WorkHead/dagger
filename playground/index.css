@@ -1,0 +1,36 @@
+*{
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+.container {
+    width: 100%;
+    height: 500px;
+}
+.show {
+    width: 50%;
+    height: 100%;
+    border: 1px solid #aaaaaa;
+}
+.template {
+    height: 50%;
+    width: 100%;
+}
+.scope {
+    height: 50%;
+    width: 100%;
+}
+.result {
+    float: right;
+}
+.code {
+    float: left;
+    border: none;
+}
+.run {
+    width: 100px;
+    height: 20px;
+    background-color: #cfcfcf;
+    color: #aaaaaa;
+    margin: 0 auto;
+}

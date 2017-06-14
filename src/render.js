@@ -7,11 +7,10 @@ import {createVNode as _c, createVTextNode as _ct} from './vDom';
 import dgComponent from './component';
 import diff from './diff'
 
-const urlReg = /^.?(\/?.+)+\w+\.\w+$/;
+const urlReg = /\w+\.html$/;
 const _cm = $.dMap.bind($);
 
 function render(tpl, elem, scope) {
-
     let conEle = $(elem.startsWith('#') ? elem : '#' + elem).getEl(),
         dgObj = new dgComponent({
             conEle: {},
