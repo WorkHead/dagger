@@ -36,7 +36,6 @@ function init() {
     $('.template').getEl()[0].innerHTML = defTmp;
     $('.scope').getEl()[0].innerHTML = scopeStr;
     $('.run').getEl()[0].addEventListener('click', run);
-    // render(defTmp, 'result', a)
     run();
 }
 
