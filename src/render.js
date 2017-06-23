@@ -159,7 +159,17 @@ function createAndAppend(vNode, ele, scope) {
 function bindWatch(dgObj) {
     let scope = dgObj.scope;
 
-    defineReactive(scope, dgObj);
+    observer(scope, dgObj);
+}
+
+function observer(obj, dgObj) {
+    if($.isObject(obj)) {
+        Object.keys(obj).forEach((key) => {
+            defineReactive(obj, key, obj[key], dgObj);
+        });
+    } else if ($.isArray(obj)) {
+        watchArr(obj, dgObj);
+    }
 }
 
 function bindModel(ele, scope, value) {
@@ -168,26 +178,20 @@ function bindModel(ele, scope, value) {
     });
 }
 
-//todo optimize arguments
-function defineReactive(scope, dgObj, key, value) {
-    $.each(scope, (v, k) => {
-        $.defProp(scope, k, () => {
-            if (!$.isVoid(key) && k == key) {
-                return value;
-            }
-            return v;
-        }, (newV) => {
-            if (newV !== v) {
-                defineReactive(scope, dgObj, k, newV);
-                notifyChange(dgObj);
-            }
-        });
+function defineReactive(scope, key, value, dgObj) {
+    if ($.isObject(value) || $.isArray(value)) {
+        observer(value, dgObj);
+    }
+    $.defProp(scope, key, () => {
+        return value;
+    }, (newV) => {
+        if (newV === value) return;
 
-        if ($.isObject(v)) {
-            defineReactive(v, dgObj);
-        } else if ($.isArray(v)) {
-            hijackArrProto(v, dgObj);
-        }
+        value = newV;
+
+        observer(newV, dgObj);
+
+        notifyChange(dgObj)
     });
 }
 
@@ -199,7 +203,7 @@ function notifyChange(dgObj) {
 }
 
 //watch array changes by overriding Array.prototype
-function hijackArrProto(arr, dgObj) {
+function watchArr(arr, dgObj) {
     let fakeProto = Object.create(Array.prototype),
         arrayFuns = ['push', 'pop', 'shift', 'unshift', 'splice', 'sort', 'reverse'];
 
@@ -211,7 +215,7 @@ function hijackArrProto(arr, dgObj) {
             notifyChange(dgObj);
 
             //rewatch
-            defineReactive(arr, dgObj);
+            observer(arr, dgObj);
 
             return res;
         });

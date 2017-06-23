@@ -9,7 +9,7 @@ const _t = {
         return this.toString(obj) === '[object Array]';
     },
     isObject(obj) {
-        return this.toString(obj) === '[object Object]';
+        return this.toString(obj) === '[object Object]' && obj !== null;
     },
     isNumber(obj) {
         return this.toString(obj) === '[object Number]';
