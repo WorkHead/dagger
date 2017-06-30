@@ -12,7 +12,7 @@ const urlReg = /\w+\.html$/;
 const _cm = $.dMap.bind($);
 
 function render(tpl, elem, scope) {
-    let conEle = $(elem.startsWith('#') ? elem : '#' + elem).getEl(),
+    let conEle = $(elem.startsWith('#') ? elem : `#${elem}`).getEl(),
         dgObj = new dgComponent({
             conEle: {},
             vDom: {},
@@ -96,9 +96,21 @@ function renderToDom(vNode, ele, scope) {
 }
 
 function renderComment(vNode, ele) {
-    let comment = 'if ---- <' + vNode.tName + '/> ---- if',
-        com = document.createComment(comment);
+    let comment = `if ---- <${vNode.tName}`,
+        com,
+        dynAtt = vNode.attrs.dyn,
+        statAtt = vNode.attrs.stat;
 
+    $.each(dynAtt, (y, ay) => {
+        comment += ` ${ay}=${y}`;
+    });
+
+    $.each(statAtt, (t, ay) => {
+        comment += ` ${at}=${t}`;
+    });
+
+    comment +=  '/> ---- if';
+    com = document.createComment(comment)
     ele.appendChild(com);
     vNode.ele = com;
     return com;

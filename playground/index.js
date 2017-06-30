@@ -41,7 +41,7 @@ function init() {
 
 function run() {
     let template =  $('.template').getEl()[0].value,
-        scope = new Function('return ' +  $('.scope').getEl()[0].value).call(null);
+        scope = new Function(`return ${$('.scope').getEl()[0].value}`).call(null);
 
     render(template, 'result', scope)
 }

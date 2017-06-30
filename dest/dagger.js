@@ -1,4 +1,8 @@
-'use strict';
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+	typeof define === 'function' && define.amd ? define(['exports'], factory) :
+	(factory((global.Dagger = global.Dagger || {})));
+}(this, (function (exports) { 'use strict';
 
 /**
  * Created by tanjiasheng on 2017/5/4.
@@ -11,7 +15,7 @@ const _t = {
         return this.toString(obj) === '[object Array]';
     },
     isObject(obj) {
-        return this.toString(obj) === '[object Object]';
+        return this.toString(obj) === '[object Object]' && obj !== null;
     },
     isNumber(obj) {
         return this.toString(obj) === '[object Number]';
@@ -90,7 +94,7 @@ const _t = {
             responseType = opts.resType || 'text';
 
         if (method == 'get' && !_t.isVoid(data)) {
-            url += /\?/.test(url) ? '&' + data : '?' + data;
+            url += /\?/.test(url) ? `${data}` : `${data}`;
             data = null;
         }
 
@@ -133,13 +137,18 @@ const _t = {
                 writable: true,
                 value: getter
             });
+    },
+    createEle(tName) {
+        return document.createElement(tName);
+    },
+    createTxtNode(txt) {
+        return document.createTextNode(txt);
     }
 };
 
 /**
  * Created by tanjiasheng on 2017/5/4.
  */
-
 function Query(selector) {
     this.el = {};
     _t.isString(selector) && (this.el = document.querySelectorAll(selector));
@@ -151,25 +160,52 @@ Query.prototype = {
     constructor: Query,
 
     val(val) {
-        if (_t.isVoid(val)) {
+        if ($.isVoid(val)) {
             return this.el[0] && (this.el[0].value || '');
         }
-        _t.each(this.el, (e) => {
+        $.each(this.el, (e) => {
             e.value = val;
         });
         return this;
     },
     attr(key, value) {
-        if (_t.isVoid(value)) {
+        if ($.isVoid(value)) {
             return this.el[0] && (this.el[0].getAttribute(key) || '');
         }
-        _t.each(this.el, (e) => {
+        $.each(this.el, (e) => {
             e.setAttribute(key, value);
         });
         return this;
     },
     getEl() {
-        return $.isArrayLike(this.el)? this.el: null;
+        return $.isArrayLike(this.el) ? this.el : null;
+    },
+    addClass(str) {
+        if ($.isArrayLike(this.el)) {
+            $.each(this.el, (e) => {
+                if (!$(e).hasClass(str)) {
+                    e.className += e.className.length > 0 ? ` ${str}` : str;
+                }
+            });
+        } else /*if($.isElement(this.el))*/ {
+            this.el.className += this.el.className.length > 0 ? ` ${str}` : str;
+        }
+    },
+    removeClass(str) {
+        if ($.isArrayLike(this.el)) {
+            $.each(this.el, (e) => {
+                if ($(e).hasClass(str)) {
+                    e.className.indexOf(str) == 0 ? e.className = e.className.replace(str, '') : e.className = e.className.replace(` ${str}`, '');
+                }
+            });
+        } else /*if($.isElement(this.el))*/ {
+            this.el.className.indexOf(str) == 0 ? this.el.className = this.el.className.replace(str, '') : this.el.className = this.el.className.replace(` ${str}`, '');
+        }
+    },
+    hasClass(str) {
+        if ($.isElement(this.el)) {
+            return this.el.className.indexOf(str) > -1
+        }
     }
 };
 
@@ -187,10 +223,11 @@ _t.extend($, _t);
  * Created by tanjiasheng on 2017/5/4.
  */
 const tagReg = /<(\/?\w+?\s?)(\:?\w+=(?:"|'|{).+?(?:"|'|})\s?)*>(?:\s*?\n*?\s*?)(.+?)??(?:\s*?\n*?\s*?)(?=<\/?\w+?\s?(?:\:?\w+=(?:"|'|{).+?(?:"|'|})\s?)*>|$)/g;
-const attrReg = /(\:?\w+=(?:"|'|{).+?(?:"|'|})\s?)/g;
+const attrReg = /(\:?\w+=((".+?")|({.+?})|('.+?'))\s?)/g;
 const bindAttReg = /(\:\w+)|(\{\{.+?\}\})/;
 const expBindReg = /\+|-|\?|!|\*|\/|<|>|\[|\]/g;
 const forReg = /(\w+)\s*in\s*(\w+)/;
+const eventReg = /^\:((click)|(input)|(change)|(touchstart)|(touchmove)|(touchend)|(scroll))$/;
 
 function parseHTML(html) {
     let stack = [],
@@ -204,6 +241,7 @@ function parseHTML(html) {
         },
         parObj = {},
         curObj = resObj;
+
     while (match = tagReg.exec(html)) {
         let tagName = match[1],
             tagStr = getAttr(match[0]),
@@ -246,9 +284,9 @@ function getAttr(str) {
 }
 
 function genVnodeExp(hObj) {
-    return 'with(scope){' +
-        'return ' + genExp(hObj) +
-        '}';
+    return `with(scope){` +
+        `return ${genExp(hObj)}` +
+        `}`;
 }
 
 function genExp(hObj, genForing) {
@@ -263,7 +301,9 @@ function genExp(hObj, genForing) {
         stat = '\"stat\": {',
         dyn = '\"dyn\": {',
         isFor = false,
-        forExp = '';
+        forExp = '',
+        classObj = '{}',
+        events = '{';
 
     if ($.isEmptyArr(attrArr) || $.isVoid(attrArr)) {
         resAtt += '}';
@@ -274,13 +314,9 @@ function genExp(hObj, genForing) {
             tmp[1] = tmp.slice(1).join('=');
             if (bindAttReg.test(tmp[1]) || bindAttReg.test(tmp[0])) {
                 tmp[1] = repBrace(tmp[1]);
-                if (expBindReg.test(tmp[1])) {
-                    dyn += '\"' + tmp[0] + '\": (function(){ return ' + tmp[1] + '})(),';
-                } else {
-                    dyn += '\"' + tmp[0] + '\": ' + tmp[1] + ',';
-                }
+                dyn += `\"${tmp[0]}\": ${tmp[1]},`;
             } else {
-                stat += '\"' + tmp[0] + '\":' + tmp[1] + ',';
+                stat += `\"${tmp[0]}\":${tmp[1]},`;
             }
 
             //if
@@ -293,6 +329,21 @@ function genExp(hObj, genForing) {
                 isFor = true;
                 forExp = tmp[1];
             }
+
+            //class
+            if(tmp[0] == ':class') {
+                classObj = repQuo(tmp[1]);
+            }
+
+            //model
+            if(tmp[0] == ':model') {
+                dyn += `"value":${repQuo(tmp[1])},`;
+            }
+
+            //events
+            if(eventReg.test(tmp[0])) {
+                events +=  `"${repCol(tmp[0])}": ${repQuo(tmp[1])},`;
+            }
         }
         stat += '}';
         dyn += '}';
@@ -300,20 +351,22 @@ function genExp(hObj, genForing) {
         resAtt += dyn + '}';
     }
 
+    events += '}';
+
     switch (type) {
         case 1:
             tName = hObj.tName.trim();
             children = hObj.children;
             if (!isFor || genForing) {
-                return '_c(\"' + tName + '\",' + resAtt + ', ' + type + ', !!(' + shouldRender + ') , [' + genChildren(children) + '])';
+                return `_c(\"${tName}\",${resAtt}, ${type}, !!(${shouldRender}) ,${classObj}, ${events}, [${genChildren(children)}])`;
             } else {
-                return genForExp(hObj, forExp)
+                return genForExp(hObj, forExp);
             }
         case 2:
             text = parseText(hObj.text);
-            return '_ct(' + text + ', 2)';
+            return `_ct(${text}, 2)`;
         default:
-            return '_c(\"div\", {},1 ,true , [])';
+            return `_c(\"div\", {}, 1 ,true, {}, {}, [])`;
     }
 }
 
@@ -328,9 +381,9 @@ function genForExp(hObj, forExp) {
         arr = res[2],
         ita = res[1];
 
-    return '_cm(' + arr + ', function(' + ita + ', $index){' +
-        'return ' + genExp(hObj, true) +
-        '})';
+    return `_cm(${arr}, function(${ita}, $index){` +
+        `return ${genExp(hObj, true)}` +
+        `})`;
 }
 
 // function parseAttr(attrs) {
@@ -364,21 +417,25 @@ function parseText(txt) {
     if (bindAttReg.test(txt)) {
         txt = repBrace(txt);
         if (expBindReg.test(txt)) {
-            return '(function(){ return ' + txt + '})()';
+            return `(function(){ return ${txt}})()`;
         } else {
             return txt;
         }
     } else {
-        return '\"' + txt + '\"';
+        return `\"${txt}\"`;
     }
 }
 
 function repBrace(str) {
-    return str.replace(/\{|\}|\b/g, '');
+    return str.replace(/\{{2}|\}{2}|\b/g, '');
 }
 
 function repQuo(str) {
     return str.replace(/"/g, '');
+}
+
+function repCol(str) {
+    return str.replace(':', '');
 }
 
 /**
@@ -391,6 +448,8 @@ class vNode {
         this.children = props.children;
         this.nodeType = props.nodeType;
         this.shouldRender = props.shouldRender;
+        this.classObj = props.classObj;
+        this.events = props.events;
     }
 }
 
@@ -408,10 +467,12 @@ function createVNode(...vObj) {
         attrs: vObj[1],
         nodeType: vObj[2],
         shouldRender: vObj[3],
-        children: vObj[4],
+        classObj: vObj[4],
+        events: vObj[5],
+        children: vObj[6],
     });
 
-    !$.isVoid(vObj[4]) && $.each(vObj[4], (o) => {
+    !$.isVoid(vObj[6]) && $.each(vObj[6], (o) => {
         o.parent = curVnode;
     });
     return curVnode;
@@ -435,28 +496,49 @@ class dgComponent {
         this.conEle = props.conEle;
         this.scope = props.scope;
     }
+    onLoad() {
+        console.info('load success');
+    }
+    onUpdate() {
+        console.info('update success');
+    }
 }
 
 /**
  * Created by tanjiasheng on 2017/5/15.
  */
-function diff(vNode, newVNode) {
-    console.log(vNode, newVNode);
+function diff(vNode, newVNode, father, scope) {
     if (vNode.tName == 'root') {
-        return diffChildren(vNode.children, newVNode.children);
+        return diffChildren(vNode.children, newVNode.children, vNode.ele, scope);
     }
+    let tarEle = vNode.ele;
     $.each(newVNode, (v, k) => {
         switch (k) {
             case 'attrs':
-                let diffRes = diffAttr(vNode.attrs, newVNode.attrs);
-                break;
-            case 'nodeType':
-                if (v !== newVNode[k]) {
-
-                }
+                //only dynamic attributes need to be diffed
+                diffAttr(vNode.attrs.dyn, v.dyn, tarEle);
+                //todo update when changed only
+                vNode.attrs.dyn = v.dyn;
                 break;
             case 'children':
-                diffChildren(vNode.children, v);
+                diffChildren(vNode.children, v, tarEle, scope);
+                break;
+            case 'shouldRender':
+                if(v !== vNode[k]) {
+                    father.replaceChild(renderToDom(newVNode, $.createEle(newVNode.tName), scope), tarEle);
+                    vNode[k] = v;
+                }
+                break;
+            case 'text':
+                if(v !== vNode[k]) {
+                    father.innerText = v;
+                    vNode[k] = v;
+                }
+                break;
+            case 'classObj':
+                diffClass(vNode.classObj, v, tarEle);
+                //todo update when changed only
+                vNode.classObj = v;
                 break;
             default:
                 break;
@@ -464,23 +546,61 @@ function diff(vNode, newVNode) {
     });
 }
 
-function diffChildren(children, newChildren) {
-
+function diffChildren(children, newChildren, ele, scope) {
+    $.each(newChildren, (nc, i) => {
+        if($.isArray(nc)) {
+            diffArr(children[i], nc, ele, scope);
+        } else {
+            diff(children[i], nc, ele, scope);
+        }
+    });
 }
 
-function diffAttr(attr, newAttr) {
+function diffAttr(attr, newAttr, tarEle) {
+    $.each(newAttr, (v, k) => {
+        if ($.isVoid(attr[k]) || attr[k] != v) {
+            tarEle.setAttribute(k, v);
+        }
+    });
+}
 
+function diffArr(arr, newArr, ele, scope) {
+    let arrNext = arr[arr.length - 1].ele.nextSibling;//this is the element which goes after the array elements we need to diff
+    $.each(newArr, (na, i) => {
+        if(!$.isVoid(arr[i])) {
+            diff(arr[i], na, ele, scope);
+        } else {
+            ele.insertBefore(renderToDom(na, $.createEle(na.tName), scope), arrNext);
+            arr.push(na);
+        }
+    });
+    if(arr.length > newArr.length) {
+        let toDel = arr.splice(newArr.length);
+        $.each(toDel, (d) => {
+           ele.removeChild(d.ele);
+        });
+    }
+}
+
+function diffClass(classObj, newClassObj, ele) {
+    $.each(newClassObj, (v, k) => {
+        if(v && !classObj[k]) {
+            $(ele).addClass(k);
+        } else if (!v && classObj[k]) {
+            $(ele).removeClass(k);
+        }
+    });
 }
 
 /**
  * Created by tanjiasheng on 2017/5/5.
+ *
  */
-const urlReg = /^.?(\/?.+)+\w+\.\w+$/;
+const urlReg = /\w+\.html$/;
 const _cm = $.dMap.bind($);
 
 function render(tpl, elem, scope) {
-
-    let conEle = $(elem.startsWith('#') ? elem : '#' + elem).getEl(),
+    let conEle = $(elem.startsWith('#') ? elem : `#${elem}`).getEl(),
         dgObj = new dgComponent({
             conEle: {},
             vDom: {},
@@ -509,7 +629,8 @@ function render(tpl, elem, scope) {
             dgObj.vNode = vNode;
             if ($.isArrayLike(conEle) && $.isElement(conEle[0])) {
                 dgObj.conEle = conEle[0];
-                renderToDom(vNode, conEle[0]);
+                renderToDom(vNode, conEle[0], scope);
+                $.callFun(dgObj.onLoad, dgObj);
             }
         } else {
             throw new Error('template error');
@@ -523,11 +644,15 @@ function render(tpl, elem, scope) {
 function genVnodeObj(vNodeExp, scope, dgObj) {
     let vNodeFun = new Function('_c', '_ct', '_cm', 'scope', vNodeExp);
 
-    dgObj.vExp = vNodeExp;
-    return vNodeFun(createVNode, createVTextNode, _cm, scope);
+    try {
+        dgObj.vExp = vNodeExp;
+        return vNodeFun(createVNode, createVTextNode, _cm, scope);
+    } catch (e) {
+        throw new Error('template parse error');
+    }
 }
 
-function renderToDom(vNode, ele) {
+function renderToDom(vNode, ele, scope) {
     let children = vNode.children,
         curEle;
 
@@ -542,43 +667,63 @@ function renderToDom(vNode, ele) {
         if (vNode.shouldRender || $.isArray(vNode)) {
             if ($.isArray(vNode)) {
                 $.each(vNode, (n) => {
-                    renderToDom(n, ele);
+                    renderToDom(n, ele, scope);
                 });
             }
-            curEle = createAndAppend(vNode, ele);
+            curEle = createAndAppend(vNode, ele, scope);
         } else {
             return renderComment(vNode, ele);
         }
     }
 
     $.each(children, (o) => {
-        renderToDom(o, curEle);
+        renderToDom(o, curEle, scope);
     });
 
+    return curEle;
 }
 
 function renderComment(vNode, ele) {
-    let comment = 'if ---- <' + vNode.tName + '/> ---- if',
-        com = document.createComment(comment);
+    let comment = `if ---- <${vNode.tName}`,
+        com,
+        dynAtt = vNode.attrs.dyn,
+        statAtt = vNode.attrs.stat;
 
+    $.each(dynAtt, (y, ay) => {
+        comment += ` ${ay}=${y}`;
+    });
+
+    $.each(statAtt, (t, ay) => {
+        comment += ` ${at}=${t}`;
+    });
+
+    comment +=  '/> ---- if';
+    com = document.createComment(comment);
     ele.appendChild(com);
+    vNode.ele = com;
+    return com;
 }
 
-function createAndAppend(vNode, ele) {
+function createAndAppend(vNode, ele, scope) {
     let type = vNode.nodeType,
         attrs,
         statAtt,
         dynAtt,
-        tarEle;
+        tarEle,
+        classObj,
+        events;
+
     switch (type) {
         case 1:
             attrs = vNode.attrs;
             statAtt = attrs.stat;
             dynAtt = attrs.dyn;
-            tarEle = document.createElement(vNode.tName);
+            classObj = vNode.classObj;
+            events = vNode.events;
+            tarEle = $.createEle(vNode.tName);
             break;
         case 2:
-            tarEle = document.createTextNode(vNode.text);
+            tarEle = $.createTxtNode(vNode.text);
             break;
     }
 
@@ -587,8 +732,20 @@ function createAndAppend(vNode, ele) {
     });
 
     $.each(dynAtt, (y, ay) => {
-        //todo view2model data bind
         tarEle.setAttribute(ay, y);
+        if(ay == ':model') {
+            bindModel(tarEle, scope, y);
+        }
+    });
+
+    $.each(classObj, (l, al) => {
+        if(l) {
+            $(tarEle).addClass(al);
+        }
+    });
+
+    $.each(events, (v, av) => {
+        tarEle.addEventListener(av, v);
     });
 
     vNode.ele = tarEle;
@@ -601,44 +758,52 @@ function createAndAppend(vNode, ele) {
 
 function bindWatch(dgObj) {
     let scope = dgObj.scope;
-    defineReactive(scope, dgObj);
+
+    observer(scope, dgObj);
 }
 
-//todo optimize arguments
-function defineReactive(scope, dgObj, key, value) {
-    $.each(scope, (v, k) => {
-        $.defProp(scope, k, () => {
-            if (!$.isVoid(key) && k == key) {
-                return value;
-            }
-            return v;
-        }, (newV) => {
-            if (newV !== v) {
-                defineReactive(scope, dgObj, k, newV);
-                notifyChange(dgObj);
-            }
+function observer(obj, dgObj) {
+    if($.isObject(obj)) {
+        Object.keys(obj).forEach((key) => {
+            defineReactive(obj, key, obj[key], dgObj);
         });
+    } else if ($.isArray(obj)) {
+        watchArr(obj, dgObj);
+    }
+}
 
-        if ($.isObject(v)) {
-            defineReactive(v, dgObj);
-        } else if ($.isArray(v)) {
-            hijackArrProto(v, dgObj);
-        }
+function bindModel(ele, scope, value) {
+    ele.addEventListener('input', (e) => {
+       scope[value] = ele.value;
+    });
+}
+
+function defineReactive(scope, key, value, dgObj) {
+    if ($.isObject(value) || $.isArray(value)) {
+        observer(value, dgObj);
+    }
+    $.defProp(scope, key, () => {
+        return value;
+    }, (newV) => {
+        if (newV === value) return;
+
+        value = newV;
+
+        observer(newV, dgObj);
+
+        notifyChange(dgObj);
     });
 }
 
 function notifyChange(dgObj) {
     let newVNode = genVnodeObj(dgObj.vExp, dgObj.scope, dgObj);
 
-    //todo diff
-    renderToDom(newVNode, dgObj.conEle);
-
-    diff(dgObj.vNode, newVNode);
-    dgObj.vNode = newVNode;
+    diff(dgObj.vNode, newVNode, dgObj.conEle, dgObj.scope);
+    $.callFun(dgObj.onUpdate, dgObj);
 }
 
 //watch array changes by overriding Array.prototype
-function hijackArrProto(arr, dgObj) {
+function watchArr(arr, dgObj) {
     let fakeProto = Object.create(Array.prototype),
         arrayFuns = ['push', 'pop', 'shift', 'unshift', 'splice', 'sort', 'reverse'];
 
@@ -650,7 +815,7 @@ function hijackArrProto(arr, dgObj) {
             notifyChange(dgObj);
 
             //rewatch
-            defineReactive(arr, dgObj);
+            observer(arr, dgObj);
 
             return res;
         });
@@ -663,43 +828,9 @@ function hijackArrProto(arr, dgObj) {
  * Created by tanjiasheng on 2017/5/4.
  */
 
-/*
- * A simple template engine with two-way data bindings.
- *
- * */
-let a = {
-    text1: 'text1',
-    text2: 'text2',
-    num1: 1,
-    num3: 3,
-    arr:  [1,2,3,4],
-    obj: {
-        qq: 1,
-        bb: {
-            cc: 2
-        }
-    },
-    dd: 'dddddddd'
+exports.render = render;
+exports.$ = $;
 
-};
-render('templates/test.html', 'test1', a);
+Object.defineProperty(exports, '__esModule', { value: true });
 
-setTimeout(() => {
-    a.arr.push(5);
-}, 1000);
-
-setTimeout(() => {
-    a.arr.push(6);
-}, 2000);
-
-
-
-// render('templates/test.html', 'test2', b)
-
-// setInterval( ()=> {
-//     a.num3++;
-// }, 1000);
-//
-// setInterval(()=> {
-//     b.num3++;
-// }, 2000)
+})));

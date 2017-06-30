@@ -66,9 +66,9 @@ function getAttr(str) {
 }
 
 function genVnodeExp(hObj) {
-    return 'with(scope){' +
-        'return ' + genExp(hObj) +
-        '}';
+    return `with(scope){` +
+        `return ${genExp(hObj)}` +
+        `}`;
 }
 
 function genExp(hObj, genForing) {
@@ -96,9 +96,9 @@ function genExp(hObj, genForing) {
             tmp[1] = tmp.slice(1).join('=');
             if (bindAttReg.test(tmp[1]) || bindAttReg.test(tmp[0])) {
                 tmp[1] = repBrace(tmp[1]);
-                dyn += '\"' + tmp[0] + '\": ' + tmp[1] + ',';
+                dyn += `\"${tmp[0]}\": ${tmp[1]},`;
             } else {
-                stat += '\"' + tmp[0] + '\":' + tmp[1] + ',';
+                stat += `\"${tmp[0]}\":${tmp[1]},`;
             }
 
             //if
@@ -119,12 +119,12 @@ function genExp(hObj, genForing) {
 
             //model
             if(tmp[0] == ':model') {
-                dyn += '"value":' + repQuo(tmp[1]) + ',';
+                dyn += `"value":${repQuo(tmp[1])},`;
             }
 
             //events
             if(eventReg.test(tmp[0])) {
-                events +=  '"' + repCol(tmp[0]) + '": ' + repQuo(tmp[1]) + ',';
+                events +=  `"${repCol(tmp[0])}": ${repQuo(tmp[1])},`;
             }
         }
         stat += '}';
@@ -140,15 +140,15 @@ function genExp(hObj, genForing) {
             tName = hObj.tName.trim();
             children = hObj.children;
             if (!isFor || genForing) {
-                return '_c(\"' + tName + '\",' + resAtt + ', ' + type + ', !!(' + shouldRender + ') ,' + classObj + ', '+ events + ', [' + genChildren(children) + '])';
+                return `_c(\"${tName}\",${resAtt}, ${type}, !!(${shouldRender}) ,${classObj}, ${events}, [${genChildren(children)}])`;
             } else {
                 return genForExp(hObj, forExp);
             }
         case 2:
             text = parseText(hObj.text);
-            return '_ct(' + text + ', 2)';
+            return `_ct(${text}, 2)`;
         default:
-            return '_c(\"div\", {}, 1 ,true, {}, {}, [])';
+            return `_c(\"div\", {}, 1 ,true, {}, {}, [])`;
     }
 }
 
@@ -163,9 +163,9 @@ function genForExp(hObj, forExp) {
         arr = res[2],
         ita = res[1];
 
-    return '_cm(' + arr + ', function(' + ita + ', $index){' +
-        'return ' + genExp(hObj, true) +
-        '})';
+    return `_cm(${arr}, function(${ita}, $index){` +
+        `return ${genExp(hObj, true)}` +
+        `})`;
 }
 
 // function parseAttr(attrs) {
@@ -199,12 +199,12 @@ function parseText(txt) {
     if (bindAttReg.test(txt)) {
         txt = repBrace(txt);
         if (expBindReg.test(txt)) {
-            return '(function(){ return ' + txt + '})()';
+            return `(function(){ return ${txt}})()`;
         } else {
             return txt;
         }
     } else {
-        return '\"' + txt + '\"';
+        return `\"${txt}\"`;
     }
 }
 

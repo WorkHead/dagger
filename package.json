@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "A simple template engine with two-way data binding.",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "webpack",
+    "rollup": "rollup ./src/dagger.js --format umd --name Dagger --output ./dest/dagger.js"
   },
   "repository": {
     "type": "git",

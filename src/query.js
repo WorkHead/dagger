@@ -39,22 +39,22 @@ Query.prototype = {
         if ($.isArrayLike(this.el)) {
             $.each(this.el, (e) => {
                 if (!$(e).hasClass(str)) {
-                    e.className += e.className.length > 0 ? ' ' + str : str;
+                    e.className += e.className.length > 0 ? ` ${str}` : str;
                 }
             });
         } else /*if($.isElement(this.el))*/ {
-            this.el.className += this.el.className.length > 0 ? ' ' + str : str;
+            this.el.className += this.el.className.length > 0 ? ` ${str}` : str;
         }
     },
     removeClass(str) {
         if ($.isArrayLike(this.el)) {
             $.each(this.el, (e) => {
                 if ($(e).hasClass(str)) {
-                    e.className.indexOf(str) == 0 ? e.className = e.className.replace(str, '') : e.className = e.className.replace(' ' + str, '');
+                    e.className.indexOf(str) == 0 ? e.className = e.className.replace(str, '') : e.className = e.className.replace(` ${str}`, '');
                 }
             });
         } else /*if($.isElement(this.el))*/ {
-            this.el.className.indexOf(str) == 0 ? this.el.className = this.el.className.replace(str, '') : this.el.className = this.el.className.replace(' ' + str, '');
+            this.el.className.indexOf(str) == 0 ? this.el.className = this.el.className.replace(str, '') : this.el.className = this.el.className.replace(` ${str}`, '');
         }
     },
     hasClass(str) {

@@ -88,7 +88,7 @@ const _t = {
             responseType = opts.resType || 'text';
 
         if (method == 'get' && !_t.isVoid(data)) {
-            url += /\?/.test(url) ? '&' + data : '?' + data;
+            url += /\?/.test(url) ? `${data}` : `${data}`;
             data = null;
         }
 
