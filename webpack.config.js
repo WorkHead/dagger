@@ -5,11 +5,12 @@ const path = require('path');
 module.exports = {
     entry: {
         example:  './example/index.js',
-        playground: './playground/index.js'
+        playground: './playground/index.js',
+        dagger: './dest/dagger.js'
     },
     output: {
         filename: '[name].min.js',
-        path: __dirname + '/dest'
+        path: __dirname + '/dest',
     },
     module: {
         rules: [

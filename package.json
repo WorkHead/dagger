@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "A simple template engine with two-way data binding.",
   "scripts": {
-    "build": "webpack",
+    "build": "rollup -c rollup.config.js && webpack",
     "dev": "webpack-dev-server",
-    "rollup": "rollup ./src/dagger-instance.js --format umd --name Dagger --output ./dest/dagger.js"
+    "rollup": "rollup -c rollup.config.js"
   },
   "repository": {
     "type": "git",
@@ -20,12 +20,16 @@
   "devDependencies": {
     "babel-core": "^6.24.1",
     "babel-loader": "^7.0.0",
+    "babel-plugin-external-helpers": "^6.22.0",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-es2015-without-strict": "0.0.4",
+    "babel-preset-latest": "^6.24.1",
     "css-loader": "^0.28.1",
     "file-loader": "^0.11.1",
     "less": "^2.7.2",
     "less-loader": "^4.0.3",
+    "rollup-plugin-babel": "^2.7.1",
+    "rollup-plugin-node-resolve": "^3.0.0",
     "style-loader": "^0.17.0",
     "url-loader": "^0.5.8",
     "webpack": "^2.4.1",
