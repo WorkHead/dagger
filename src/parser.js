@@ -9,7 +9,7 @@ const tagReg = /<(\/?\w+?\s?)(\:?\w+=(?:"|'|{).+?(?:"|'|})\s?)*>(?:\s*?\n*?\s*?)
     bindAttReg = /(\:\w+)|(\{\{.+?\}\})/,
     expBindReg = /\+|-|\?|!|\*|\/|<|>|\[|\]/g,
     forReg = /(\w+)\s*in\s*(\w+)/,
-    eventReg = /^\:((click)|(input)|(change)|(touchstart)|(touchmove)|(touchend)|(scroll))$/;
+    eventReg = /^\:((click)|(input)|(change)|(touchstart)|(touchmove)|(touchend)|(scroll)|(blur)|(focus)|(keydown)|(keypress)|(keyup)|(load)|(mousedown)|(mousemove)|(mouseout)|(mouseover)|(mouseup)|(select)|(submit))$/;
 
 function parseHTML(html) {
     let stack = [],

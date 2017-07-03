@@ -29,5 +29,11 @@ module.exports = {
             }
         })
     ],
-    watch: true
+    watch: true,
+    devServer: {
+        contentBase: path.join(__dirname, "example"),
+        compress: true,
+        port: 9000,
+        inline: true
+    }   
 };

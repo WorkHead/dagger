@@ -1,8 +1,8 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-	typeof define === 'function' && define.amd ? define(['exports'], factory) :
-	(factory((global.Dagger = global.Dagger || {})));
-}(this, (function (exports) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+	typeof define === 'function' && define.amd ? define(factory) :
+	(global.Dagger = factory());
+}(this, (function () { 'use strict';
 
 /**
  * Created by tanjiasheng on 2017/5/4.
@@ -600,6 +600,10 @@ const urlReg = /\w+\.html$/;
 const _cm = $.dMap.bind($);
 
 function render(tpl, elem, scope) {
+    if($.isObject(tpl)) {
+        
+    }
+
     let conEle = $(elem.startsWith('#') ? elem : `#${elem}`).getEl(),
         dgObj = new dgComponent({
             conEle: {},
@@ -824,13 +828,10 @@ function watchArr(arr, dgObj) {
     arr.__proto__ = fakeProto;
 }
 
-/**
- * Created by tanjiasheng on 2017/5/4.
- */
+const Dagger = {
+    $, render
+};
 
-exports.render = render;
-exports.$ = $;
-
-Object.defineProperty(exports, '__esModule', { value: true });
+return Dagger;
 
 })));

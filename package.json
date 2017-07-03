@@ -4,7 +4,8 @@
   "description": "A simple template engine with two-way data binding.",
   "scripts": {
     "build": "webpack",
-    "rollup": "rollup ./src/dagger.js --format umd --name Dagger --output ./dest/dagger.js"
+    "dev": "webpack-dev-server",
+    "rollup": "rollup ./src/dagger-instance.js --format umd --name Dagger --output ./dest/dagger.js"
   },
   "repository": {
     "type": "git",
@@ -27,6 +28,7 @@
     "less-loader": "^4.0.3",
     "style-loader": "^0.17.0",
     "url-loader": "^0.5.8",
-    "webpack": "^2.4.1"
+    "webpack": "^2.4.1",
+    "webpack-dev-server": "^2.5.0"
   }
 }

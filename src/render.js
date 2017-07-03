@@ -52,7 +52,6 @@ function render(tpl, elem, scope) {
     return dgObj;
 }
 
-
 function genVnodeObj(vNodeExp, scope, dgObj) {
     let vNodeFun = new Function('_c', '_ct', '_cm', 'scope', vNodeExp);
 
@@ -90,7 +89,7 @@ function renderToDom(vNode, ele, scope) {
 
     $.each(children, (o) => {
         renderToDom(o, curEle, scope);
-    });
+    }); 
 
     return curEle;
 }
@@ -102,11 +101,11 @@ function renderComment(vNode, ele) {
         statAtt = vNode.attrs.stat;
 
     $.each(dynAtt, (y, ay) => {
-        comment += ` ${ay}=${y}`;
+        comment += ` ${ay}="${y}"`;
     });
 
     $.each(statAtt, (t, ay) => {
-        comment += ` ${at}=${t}`;
+        comment += ` ${at}="${t}"`;
     });
 
     comment +=  '/> ---- if';
